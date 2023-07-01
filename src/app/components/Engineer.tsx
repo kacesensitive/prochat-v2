@@ -8,6 +8,8 @@ import { invoke } from "@tauri-apps/api/tauri";
 import { State } from "./Control";
 import { FaSearch } from 'react-icons/fa';
 import { BsFill1CircleFill } from "react-icons/bs";
+import { IoIosArrowDown } from "react-icons/io";
+import { TbUserPlus } from "react-icons/tb";
 
 interface Message {
     id: string | undefined;
@@ -47,6 +49,10 @@ export function Main() {
     const [messageShown, setMessageShown] = useState(false);
     const [highlightedMessageId, setHighlightedMessageId] = useState(null);
 
+    const handleMessageClicked = (messageId: any) => {
+        setHighlightedMessageId(messageId);
+    };
+
     useEffect(() => {
         //@ts-ignore
         window.__TAURI__.event.listen('stream-changed', () => {
@@ -54,6 +60,25 @@ export function Main() {
             window.location.reload();
         });
     }, []);
+
+    function onMessageClick(messageId: any) {
+        console.log("Message clicked: " + messageId);
+        //@ts-ignore
+        window.__TAURI__.event.emit("message-clicked", messageId);
+    }
+
+    const chatWindowRef = useRef(null);
+
+    const onArrowDownClick = () => {
+        //@ts-ignore
+        window.__TAURI__.event.emit("snap-down");
+
+        // Scroll to the bottom of chat window
+        if (chatWindowRef.current) {
+            //@ts-ignore
+            chatWindowRef.current.scrollTop = chatWindowRef.current.scrollHeight;
+        }
+    };
 
     const [greetMsg, setGreetMsg] = useState("");
 
@@ -70,10 +95,7 @@ export function Main() {
         setFontSize(myState.fontSize); // update font size here
         setEmojiSize(myState.emojiSize); // update emoji size here
         setUseTagColor(myState.useTagColor); // update useTagColor here
-        console.log(myState);
     });
-
-    const chatWindowRef = useRef(null);
 
     useEffect(() => {
         let isSubscribed = true; // Local variable
@@ -111,28 +133,6 @@ export function Main() {
         };
         //@ts-ignore
         window.__TAURI__.event.listen('hide-control-message', hideControlMessageHandler);
-
-        const handleMessageClicked = (messageId: any) => {
-            const messageElement = document.getElementById(messageId.payload);
-            console.log(messageElement);
-            if (messageElement) {
-                setHighlightedMessageId(messageId.payload);
-                messageElement.scrollIntoView({ behavior: "smooth", block: "start" });
-                window.scrollBy(0, -100);
-            }
-        };
-
-        //@ts-ignore
-        window.__TAURI__.event.listen('message-clicked', handleMessageClicked);
-
-        //@ts-ignore
-        window.__TAURI__.event.listen('snap-down', () => {
-            //scroll to the bottom of the page
-            if (chatWindowRef.current) {
-                //@ts-ignore
-                chatWindowRef.current.scrollTop = chatWindowRef.current.scrollHeight;
-            }
-        });
 
         return () => {
             // No event listener removal, but prevent state update when component is unmounted
@@ -177,6 +177,7 @@ export function Main() {
             };
 
             msg.message = message;
+            console.log(JSON.stringify(tags, null, 2))
 
             //@ts-ignore
             setChat((prevChat) => {
@@ -264,8 +265,13 @@ export function Main() {
                                 initial={{ opacity: 0, y: -50 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 exit={{ opacity: 0, y: -50 }}
+                                onClick={() => {
+                                    onMessageClick(chatLine.id);
+                                    handleMessageClicked(chatLine.id);
+                                }}
                             >
-                                {chatLine.first && <BsFill1CircleFill size={`${fontSize * 1.2}px`} color="gold" style={{ marginRight: "20px", paddingTop: "5px" }} />}
+                                {chatLine.first && <BsFill1CircleFill size={`${fontSize * 1.2}px`} style={{ marginRight: "20px", paddingTop: "5px" }} color="gold" />}
+                                {chatLine.returningChatter && <TbUserPlus size={`${fontSize * 1.2}px`} style={{ marginRight: "20px", paddingTop: "5px" }} color="gold" />}
                                 {chatLine.id === highlightedMessageId && <FaSearch size={`${fontSize * 1.2}px`} color="gold" style={{ padding: "4px" }} />}
                                 <span className="username" style={{ fontWeight: "bold", color: chatLine.id === highlightedMessageId ? "#FFC100" : useTagColor ? chatLine.color : "", fontSize: chatLine.id === highlightedMessageId ? `${fontSize * 1.6}px` : fontSize }}>{chatLine.user}: </span>
                                 <span className="message" dangerouslySetInnerHTML={{
@@ -281,6 +287,14 @@ export function Main() {
 
                 </div>
                 <div className="my-7" />
+            </div><div style={{
+                position: 'absolute',
+                right: '1em',
+                bottom: '1em',
+                zIndex: 9999,
+                cursor: 'pointer', // makes the icon clickable
+            }}>
+                <IoIosArrowDown size="3em" onClick={() => onArrowDownClick()} />
             </div></>
     );
 }
