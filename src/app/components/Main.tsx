@@ -46,6 +46,8 @@ export function Main() {
     const [controlMessage, setControlMessage] = useState<ControlMessage | null>(null); // Single control message instead of an array
     const [messageShown, setMessageShown] = useState(false);
     const [highlightedMessageId, setHighlightedMessageId] = useState(null);
+    const [userFilter, setUserFilter] = useState("");
+    const [searchString, setSearchString] = useState("");
 
     useEffect(() => {
         //@ts-ignore
@@ -54,8 +56,6 @@ export function Main() {
             window.location.reload();
         });
     }, []);
-
-    const [greetMsg, setGreetMsg] = useState("");
 
     let myState: State = {
         emojiSize: "1.0",
@@ -74,6 +74,14 @@ export function Main() {
     });
 
     const chatWindowRef = useRef(null);
+
+    const handleUserClicked = (user: any) => {
+        setUserFilter(user.payload);
+    };
+
+    const handleUserClearClicked = () => {
+        setUserFilter("");
+    };
 
     useEffect(() => {
         let isSubscribed = true; // Local variable
@@ -113,9 +121,12 @@ export function Main() {
         window.__TAURI__.event.listen('hide-control-message', hideControlMessageHandler);
 
         const handleMessageClicked = (messageId: any) => {
+            if (messageId.payload === "") {
+                setHighlightedMessageId(null);
+            }
             const messageElement = document.getElementById(messageId.payload);
-            console.log(messageElement);
             if (messageElement) {
+                console.log('AHHH', messageId.payload);
                 setHighlightedMessageId(messageId.payload);
                 messageElement.scrollIntoView({ behavior: "smooth", block: "start" });
                 window.scrollBy(0, -100);
@@ -124,6 +135,21 @@ export function Main() {
 
         //@ts-ignore
         window.__TAURI__.event.listen('message-clicked', handleMessageClicked);
+
+        //@ts-ignore
+        window.__TAURI__.event.listen('user-clicked', handleUserClicked);
+
+        //@ts-ignore
+        window.__TAURI__.event.listen('clear-user-clicked', handleUserClearClicked);
+
+        // New 'search-string-changed' listener
+        const searchStringChanged = (string: any) => {
+            if (isSubscribed) {
+                setSearchString(string.payload);
+            }
+        };
+        //@ts-ignore
+        window.__TAURI__.event.listen('search-string-changed', searchStringChanged);
 
         //@ts-ignore
         window.__TAURI__.event.listen('snap-down', () => {
@@ -139,10 +165,6 @@ export function Main() {
             isSubscribed = false;
         };
     }, []);
-
-    async function greet() {
-        setGreetMsg(await invoke("greet", { name: "Bob" }));
-    }
 
     //@ts-ignore
     useEffect(() => {
@@ -248,35 +270,36 @@ export function Main() {
                     msOverflowStyle: 'none', // for Internet Explorer and Edge
                 }}>
                     <AnimatePresence>
-                        {chat.map((chatLine: any, index) => (
-                            <motion.div
-                                key={index}
-                                id={chatLine.id}
-                                className="chatLine"
-                                style={{
-                                    border: chatLine.first ? "2px solid white" : "1px solid black",
-                                    borderRadius: "10px",
-                                    backgroundColor: chatLine.first ? "gray" : chatLine.id === highlightedMessageId ? "gray" : "",
-                                    fontWeight: chatLine.first ? "bold" : "normal",
-                                    fontSize: chatLine.first ? `${fontSize * 1.2}px` : `${fontSize}px`,
-                                    cursor: "pointer"
-                                }}
-                                initial={{ opacity: 0, y: -50 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, y: -50 }}
-                            >
-                                {chatLine.first && <BsFill1CircleFill size={`${fontSize * 1.2}px`} color="gold" style={{ marginRight: "20px", paddingTop: "5px" }} />}
-                                {chatLine.id === highlightedMessageId && <FaSearch size={`${fontSize * 1.2}px`} color="gold" style={{ padding: "4px" }} />}
-                                <span className="username" style={{ fontWeight: "bold", color: chatLine.id === highlightedMessageId ? "#FFC100" : useTagColor ? chatLine.color : "", fontSize: chatLine.id === highlightedMessageId ? `${fontSize * 1.6}px` : fontSize }}>{chatLine.user}: </span>
-                                <span className="message" dangerouslySetInnerHTML={{
-                                    __html: Autolinker.link(parse(chatLine.message, chatLine.emotes, options), {
-                                        className: 'apple',
-                                    }),
-                                }} style={{
-                                    fontSize: chatLine.id === highlightedMessageId ? `${fontSize * 1.6}px` : fontSize
-                                }} />
-                            </motion.div>
-                        )).reverse()}
+                        {chat.filter((chatLine: any) => (userFilter === "" || chatLine.user === userFilter) && (searchString === "" || chatLine.user.toLowerCase().includes(searchString.toLowerCase()) || chatLine.message.toLowerCase().includes(searchString.toLowerCase())))
+                            .map((chatLine: any, index) => (
+                                <motion.div
+                                    key={index}
+                                    id={chatLine.id}
+                                    className="chatLine"
+                                    style={{
+                                        border: chatLine.first ? "2px solid white" : "1px solid black",
+                                        borderRadius: "10px",
+                                        backgroundColor: chatLine.first ? "gray" : chatLine.id === highlightedMessageId ? "gray" : "",
+                                        fontWeight: chatLine.first ? "bold" : "normal",
+                                        fontSize: chatLine.first ? `${fontSize * 1.2}px` : `${fontSize}px`,
+                                        cursor: "pointer"
+                                    }}
+                                    initial={{ opacity: 0, y: -50 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: -50 }}
+                                >
+                                    {chatLine.first && <BsFill1CircleFill size={`${fontSize * 1.2}px`} color="gold" style={{ marginRight: "20px", paddingTop: "5px" }} />}
+                                    {chatLine.id === highlightedMessageId && <FaSearch size={`${fontSize * 1.2}px`} color="gold" style={{ padding: "4px" }} />}
+                                    <span className="username" style={{ fontWeight: "bold", color: chatLine.id === highlightedMessageId ? "#FFC100" : useTagColor ? chatLine.color : "", fontSize: chatLine.id === highlightedMessageId ? `${fontSize * 1.6}px` : fontSize }}>{chatLine.user}: </span>
+                                    <span className="message" dangerouslySetInnerHTML={{
+                                        __html: Autolinker.link(parse(chatLine.message, chatLine.emotes, options), {
+                                            className: 'apple',
+                                        }),
+                                    }} style={{
+                                        fontSize: chatLine.id === highlightedMessageId ? `${fontSize * 1.6}px` : fontSize
+                                    }} />
+                                </motion.div>
+                            )).reverse()}
                     </AnimatePresence>
 
                 </div>

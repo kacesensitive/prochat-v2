@@ -28,6 +28,7 @@ export default function Control() {
     const [stream, setStream] = useState(() => window.localStorage.getItem('stream') || 'EverythingNowShow');
     const [message, setMessage] = useState('');
     const [isVisible, setIsVisible] = useState(false);
+    const [searchString, setSearchString] = useState('');
 
     useEffect(() => {
         setFontSize(Number(window.localStorage.getItem('fontSize') || '14'));
@@ -61,6 +62,18 @@ export default function Control() {
         window.localStorage.setItem('stream', newStream);
         //@ts-ignore
         window.__TAURI__.event.emit('stream-changed');
+    }
+
+    const handleSearchStringChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setSearchString(event.target.value);
+        //@ts-ignore
+        window.__TAURI__.event.emit('search-string-changed', event.target.value);
+    }
+
+    const clearSearchString = () => {
+        setSearchString('');
+        //@ts-ignore
+        window.__TAURI__.event.emit('search-string-changed', '');
     }
 
     const handleStreamChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -131,6 +144,17 @@ export default function Control() {
                 onChange={handleMessageChange}
             />
             <button onClick={handleSend}>{isVisible ? 'Hide' : 'Show'} Control Message</button>
+            <label htmlFor="searchString">Search: </label>
+            <div style={{ display: 'flex' }}>
+                <input
+                    type="text"
+                    id="searchString"
+                    name="searchString"
+                    value={searchString}
+                    onChange={handleSearchStringChange}
+                />
+                <button onClick={clearSearchString} style={{ marginLeft: '10px' }}>X</button>
+            </div>
         </main>
     )
 }
