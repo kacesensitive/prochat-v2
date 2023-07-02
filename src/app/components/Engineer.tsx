@@ -11,6 +11,7 @@ import { BsFill1CircleFill } from "react-icons/bs";
 import { IoIosArrowDown } from "react-icons/io";
 import { TbUserPlus } from "react-icons/tb";
 import { AiOutlineClear } from "react-icons/ai";
+import { PiPlantBold } from "react-icons/pi";
 
 interface Message {
     id: string | undefined;
@@ -36,6 +37,7 @@ interface ControlMessage {
 
 export function Main() {
     const [chat, setChat] = useState([]);
+    const [firstMessageUsers, setFirstMessageUsers] = useState([]);
     // Retrieve stored settings from local storage
     const initialFontSize = parseInt(window.localStorage.getItem('fontSize') || '14');
     const initialEmojiSize = window.localStorage.getItem('emojiSize') || '1.0';
@@ -203,6 +205,20 @@ export function Main() {
                 firstMessage: tags?.['first-msg'],
             };
 
+            if (msg.firstMessage) {
+                //@ts-ignore
+                setFirstMessageUsers(prevUsers => [...prevUsers, msg.username]);
+            }
+
+            console.log(firstMessageUsers);
+
+            // If this user is in firstMessageUsers array, set firstMessage to true
+            //@ts-ignore
+            if (firstMessageUsers.includes(msg.username)) {
+                msg.firstMessage = true;
+                console.log('first message', msg.username);
+            }
+
             msg.message = message;
             //@ts-ignore
             setChat((prevChat) => {
@@ -211,7 +227,7 @@ export function Main() {
                 if (lastChat && lastChat.user === tags["display-name"] && lastChat.message === message) {
                     return prevChat;
                 } else {
-                    return [...prevChat, { user: tags["display-name"], message, emotes: tags?.emotes, color: tags?.color, first: tags?.['first-msg'], id: tags?.id, returningChatter: tags?.['returning-chatter'] }];
+                    return [...prevChat, { user: tags["display-name"], message, emotes: tags?.emotes, color: tags?.color, first: msg.firstMessage, id: tags?.id, returningChatter: tags?.['returning-chatter'] }];
                 }
             });
         });
@@ -287,7 +303,7 @@ export function Main() {
                                     style={{
                                         border: chatLine.first ? "2px solid white" : "1px solid black",
                                         borderRadius: "10px",
-                                        backgroundColor: chatLine.first ? "gray" : chatLine.id === highlightedMessageId ? "gray" : "",
+                                        backgroundColor: chatLine.first ? "green" : chatLine.id === highlightedMessageId ? "gray" : "",
                                         fontWeight: chatLine.first ? "bold" : "normal",
                                         fontSize: chatLine.first ? `${fontSize * 1.2}px` : `${fontSize}px`,
                                         cursor: "pointer"
@@ -300,8 +316,7 @@ export function Main() {
                                         handleMessageClicked(chatLine.id);
                                     }}
                                 >
-                                    {chatLine.first && <BsFill1CircleFill size={`${fontSize * 1.2}px`} style={{ marginRight: "20px", paddingTop: "5px" }} color="gold" />}
-                                    {chatLine.returningChatter && <TbUserPlus size={`${fontSize * 1.2}px`} style={{ marginRight: "20px", paddingTop: "5px" }} color="gold" />}
+                                    {chatLine.first && <PiPlantBold size={`${fontSize * 1.2}px`} color="white" style={{ marginRight: "20px", paddingTop: "5px" }} />}
                                     {chatLine.id === highlightedMessageId && <FaSearch size={`${fontSize * 1.2}px`} color="gold" style={{ padding: "4px" }} />}
                                     <span className="username"
                                         onClick={(e: any) => {
@@ -310,7 +325,10 @@ export function Main() {
                                             e.stopPropagation();
                                         }
                                         }
-                                        style={{ fontWeight: "bold", color: chatLine.id === highlightedMessageId ? "#FFC100" : useTagColor ? chatLine.color : "", fontSize: chatLine.id === highlightedMessageId ? `${fontSize * 1.6}px` : fontSize }}>{chatLine.user}: </span>
+                                        style={{
+                                            fontWeight: "bold", color: chatLine.first ? "white" : chatLine.id === highlightedMessageId ? "#FFC100" : useTagColor ? chatLine.color : "",
+                                            fontSize: chatLine.id === highlightedMessageId ? `${fontSize * 1.6}px` : fontSize
+                                        }}>{chatLine.user}: </span>
                                     <span className="message" dangerouslySetInnerHTML={{
                                         __html: Autolinker.link(parse(chatLine.message, chatLine.emotes, options), {
                                             className: 'apple',
