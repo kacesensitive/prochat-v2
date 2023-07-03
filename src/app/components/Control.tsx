@@ -112,11 +112,7 @@ export default function Control() {
             />
             <label htmlFor="emojiSize">Emoji Size: </label>
             <select style={{ "color": "black" }} id="emojiSize" name="emojiSize" value={emojiSize} onChange={handleEmojiSizeChange}>
-                <option value="0.5">0.5</option>
-                <option value="0.75">0.75</option>
                 <option value="1.0">1.0</option>
-                <option value="1.25">1.25</option>
-                <option value="1.5">1.5</option>
                 <option value="2.0">2.0</option>
             </select>
             <label htmlFor="useTagColor">Use Tag Color: </label>

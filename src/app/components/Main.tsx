@@ -34,6 +34,7 @@ interface ControlMessage {
 export function Main() {
     const [chat, setChat] = useState([]);
     const [firstMessageUsers, setFirstMessageUsers] = useState([]);
+    const firstMessageUsersRef = useRef([]);
     // Retrieve stored settings from local storage
     const initialFontSize = parseInt(window.localStorage.getItem('fontSize') || '14');
     const initialEmojiSize = window.localStorage.getItem('emojiSize') || '1.0';
@@ -188,19 +189,19 @@ export function Main() {
                 returningChatter: tags?.['returning-chatter'],
                 firstMessage: tags?.['first-msg'],
             };
+            let first = false;
 
             if (msg.firstMessage) {
                 //@ts-ignore
-                setFirstMessageUsers(prevUsers => [...prevUsers, msg.username]);
+                firstMessageUsersRef.current = [...firstMessageUsersRef.current, msg.username];
+                setFirstMessageUsers(firstMessageUsersRef.current);
+                console.log('first message1', msg.username);
+                console.log(firstMessageUsersRef.current);
             }
-
-            console.log(firstMessageUsers);
-
-            // If this user is in firstMessageUsers array, set firstMessage to true
             //@ts-ignore
-            if (firstMessageUsers.includes(msg.username)) {
-                msg.firstMessage = true;
-                console.log('first message', msg.username);
+            if (firstMessageUsersRef.current.includes(msg.username)) {
+                first = true;
+                console.log('first message2', msg.username);
             }
 
             msg.message = message;
@@ -212,7 +213,7 @@ export function Main() {
                 if (lastChat && lastChat.user === tags["display-name"] && lastChat.message === message) {
                     return prevChat;
                 } else {
-                    return [...prevChat, { user: tags["display-name"], message, emotes: tags?.emotes, color: tags?.color, first: msg.firstMessage, id: tags?.id, returningChatter: tags?.['returning-chatter'] }];
+                    return [...prevChat, { user: tags["display-name"], message, emotes: tags?.emotes, color: tags?.color, first: first, id: tags?.id, returningChatter: tags?.['returning-chatter'] }];
                 }
             });
         });
