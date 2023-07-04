@@ -9,7 +9,7 @@
   },
   "package": {
     "productName": "prochat-app-v2",
-    "version": "2.1.1"
+    "version": "2.2.1"
   },
   "tauri": {
     "allowlist": {
@@ -78,16 +78,6 @@
         "fullscreen": false,
         "transparent": false,
         "url": "/engineer"
-      },
-      {
-        "title": "Controls",
-        "width": 350,
-        "height": 500,
-        "resizable": false,
-        "fullscreen": false,
-        "transparent": false,
-        "label": "secondary",
-        "url": "/control"
       }
     ]
   }

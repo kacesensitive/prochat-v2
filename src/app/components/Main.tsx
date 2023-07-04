@@ -60,7 +60,7 @@ export function Main() {
 
     let myState: State = {
         emojiSize: "1.0",
-        useTagColor: false,
+        useTagColor: true,
         fontSize: 14,
     };
 
@@ -276,7 +276,7 @@ export function Main() {
                     msOverflowStyle: 'none', // for Internet Explorer and Edge
                 }}>
                     <AnimatePresence>
-                        {chat.filter((chatLine: any) => (userFilter === "" || chatLine.user === userFilter))
+                        {chat.filter((chatLine: any) => highlightedMessageId ? chatLine.id === highlightedMessageId : (userFilter === "" || chatLine.user === userFilter))
                             .map((chatLine: any, index) => (
                                 <motion.div
                                     key={index}

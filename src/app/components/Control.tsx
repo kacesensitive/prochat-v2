@@ -1,6 +1,8 @@
 "use client";
 import { useState, useEffect } from 'react';
 import styles from './control.module.css'
+import { FaEnvelope, FaCog } from 'react-icons/fa';
+import { AiOutlineClose } from 'react-icons/ai';
 
 export type State = {
     fontSize: number;
@@ -11,7 +13,7 @@ export type State = {
 let myState: State = {
     fontSize: 14,
     emojiSize: "1.0",
-    useTagColor: false
+    useTagColor: true
 };
 
 function changeState(newState: State): void {
@@ -29,6 +31,12 @@ export default function Control() {
     const [message, setMessage] = useState('');
     const [isVisible, setIsVisible] = useState(false);
     const [searchString, setSearchString] = useState('');
+    const [isSettingsVisible, setIsSettingsVisible] = useState(false);
+
+    const toggleSettingsVisibility = () => {
+        setIsSettingsVisible(!isSettingsVisible);
+    }
+
 
     useEffect(() => {
         setFontSize(Number(window.localStorage.getItem('fontSize') || '14'));
@@ -98,59 +106,87 @@ export default function Control() {
         changeState({ ...myState, useTagColor: newUseTagColor });
     }
 
+    // ...
     return (
-        <main className={styles.main}>
-            <label htmlFor="fontSize">Font Size: {fontSize}</label>
-            <input
-                type="range"
-                id="fontSize"
-                name="fontSize"
-                min="10"
-                max="60"
-                value={fontSize}
-                onChange={handleFontSizeChange}
-            />
-            <label htmlFor="emojiSize">Emoji Size: </label>
-            <select style={{ "color": "black" }} id="emojiSize" name="emojiSize" value={emojiSize} onChange={handleEmojiSizeChange}>
-                <option value="1.0">1.0</option>
-                <option value="2.0">2.0</option>
-            </select>
-            <label htmlFor="useTagColor">Use Tag Color: </label>
-            <input
-                type="checkbox"
-                id="useTagColor"
-                name="useTagColor"
-                checked={useTagColor}
-                onChange={handleTagColorChange}
-            />
-            <label htmlFor="stream">Stream: </label>
-            <input
-                type="text"
-                id="stream"
-                name="stream"
-                value={stream}
-                onChange={handleStreamChange}
-            />
-            <label htmlFor="message">Message: </label>
-            <input
-                type="text"
-                id="message"
-                name="message"
-                value={message}
-                onChange={handleMessageChange}
-            />
-            <button onClick={handleSend}>{isVisible ? 'Hide' : 'Show'} Control Message</button>
-            <label htmlFor="searchString">Search: </label>
-            <div style={{ display: 'flex' }}>
-                <input
-                    type="text"
-                    id="searchString"
-                    name="searchString"
-                    value={searchString}
-                    onChange={handleSearchStringChange}
-                />
-                <button onClick={clearSearchString} style={{ marginLeft: '10px' }}>X</button>
+        <main className={styles.main} style={{ height: isSettingsVisible ? 'auto' : '10vh' }}>
+            <div className={styles.controls}>
+                <div className={styles.field}>
+                    <label htmlFor="message">Message: </label>
+                    <input
+                        type="text"
+                        id="message"
+                        name="message"
+                        value={message}
+                        onChange={handleMessageChange}
+                    />
+                    <button onClick={handleSend}>
+                        {isVisible ? <FaEnvelope size={20} style={{ color: '#00FFD8', padding: '2px' }} /> : <FaEnvelope size={20} style={{ color: 'white', padding: '4px' }} />}
+                    </button>
+                </div>
+                <div className={styles.field}>
+                    <label htmlFor="searchString">Search: </label>
+                    <input
+                        type="text"
+                        id="searchString"
+                        name="searchString"
+                        value={searchString}
+                        onChange={handleSearchStringChange}
+                    />
+                    <button onClick={clearSearchString} style={{ marginLeft: '10px' }}>
+                        <AiOutlineClose size={20} />
+                    </button>
+                </div>
+                {isSettingsVisible && (
+                    <>
+                        <div className={styles.field}>
+                            <label htmlFor="fontSize">Font Size: {fontSize}</label>
+                            <input
+                                type="range"
+                                id="fontSize"
+                                name="fontSize"
+                                min="10"
+                                max="60"
+                                value={fontSize}
+                                onChange={handleFontSizeChange}
+                            />
+                        </div>
+                        <div className={styles.field}>
+                            <label htmlFor="emojiSize">Emoji Size: </label>
+                            <select id="emojiSize" name="emojiSize" value={emojiSize} onChange={handleEmojiSizeChange}>
+                                <option value="1.0">1.0</option>
+                                <option value="2.0">2.0</option>
+                            </select>
+                        </div>
+                        <div className={styles.field}>
+                            <label htmlFor="useTagColor">Use Tag Color: </label>
+                            <input
+                                type="checkbox"
+                                id="useTagColor"
+                                name="useTagColor"
+                                checked={useTagColor}
+                                onChange={handleTagColorChange}
+                            />
+                        </div>
+                        <div className={styles.field}>
+                            <label htmlFor="stream">Stream: </label>
+                            <input
+                                type="text"
+                                id="stream"
+                                name="stream"
+                                value={stream}
+                                onChange={handleStreamChange}
+                            />
+                        </div>
+                    </>
+                )}
+            </div>
+            <div className={styles.cog}>
+                <button onClick={toggleSettingsVisibility}>
+                    <FaCog size={20} />
+                </button>
             </div>
         </main>
     )
+
+
 }

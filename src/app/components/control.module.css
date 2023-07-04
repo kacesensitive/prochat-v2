@@ -1,16 +1,41 @@
 .main {
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
-    align-items: center;
-    padding: 6rem;
-    min-height: 100vh;
+    justify-content: space-around;
+    /* Use space-between for no space around outer elements */
+    /* 100% of the viewport height */
+    align-items: flex-start;
+    gap: 10px;
     background-image: url('/dragon-scales.svg');
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: cover;
-    color: black;
+    padding: 0 1rem;
 }
+
+.field {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.field input[type="text"],
+.field input[type="range"],
+.field select {
+    margin-left: 10px;
+}
+
+.controls {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    flex: 1;
+}
+
+
+.cog {
+    position: fixed;
+    right: 15px;
+    bottom: 15px;
+}
+
 
 .description {
     display: inherit;

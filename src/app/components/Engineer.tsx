@@ -5,7 +5,7 @@ import { EmoteOptions, parse } from 'simple-tmi-emotes';
 import { AnimatePresence, motion } from "framer-motion";
 import Autolinker from 'autolinker';
 import { invoke } from "@tauri-apps/api/tauri";
-import { State } from "./Control";
+import Control, { State } from "./Control";
 import { FaSearch } from 'react-icons/fa';
 import { BsFill1CircleFill } from "react-icons/bs";
 import { IoIosArrowDown } from "react-icons/io";
@@ -109,7 +109,7 @@ export function Main() {
 
     let myState: State = {
         emojiSize: "1.0",
-        useTagColor: false,
+        useTagColor: true,
         fontSize: 14,
     };
 
@@ -281,7 +281,7 @@ export function Main() {
                     borderRadius: "15px",
                     padding: "20px",
                     overflowY: "scroll",
-                    maxHeight: "98vh",
+                    maxHeight: "93vh", // Reduced by 5vh to account for footer
                     minHeight: "80vh",
                     display: "flex",
                     flexDirection: "column-reverse",
@@ -344,11 +344,12 @@ export function Main() {
 
                 </div>
                 <div className="my-7" />
-            </div><div style={{
-                position: 'absolute',
-                right: '1em',
+            </div>
+            <div style={{
+                position: 'fixed',
+                right: '3em',
                 bottom: '1em',
-                zIndex: 9999,
+                zIndex: 10000, // make sure this is higher than other z-indices
                 cursor: 'pointer', // makes the icon clickable
             }}>
                 <IoIosArrowDown size="3em" onClick={() => onArrowDownClick()} />
@@ -357,6 +358,15 @@ export function Main() {
                     onMessageClick('');
                     handleMessageClicked('');
                 }} />
+            </div>
+            <div style={{
+                position: 'fixed',
+                left: 0,
+                bottom: 0,
+                width: '100%',
+                zIndex: 9999
+            }}>
+                <Control />
             </div></>
     );
 }
