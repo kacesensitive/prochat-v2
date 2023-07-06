@@ -171,6 +171,15 @@ export function Main() {
 
         client.connect();
 
+        client.on('subgift', (channel, username, streakMonths, recipient, methods, userstate) => {
+            console.log("SUBGIFT", username, streakMonths, recipient, methods, userstate);
+            //@ts-ignore
+            setChat((prevChat) => {
+                //@ts-ignore
+                return [...prevChat, { user: "ENSBOT", message: `${username} gifted a sub to ${recipient}!!!`, emotes: null, color: "#38D2D9", first: false, id: 1, returningChatter: false, gift: true }];
+            });
+        });
+
         client.on("message", (channel, tags, message, self) => {
 
             const msg: Message = {
@@ -264,7 +273,7 @@ export function Main() {
                 <div className="chatBox" ref={chatWindowRef} style={{
                     borderRadius: "15px",
                     padding: "20px",
-                    overflowY: "scroll",
+                    overflow: "hidden",
                     maxHeight: "98vh",
                     minHeight: "80vh",
                     display: "flex",
@@ -283,7 +292,7 @@ export function Main() {
                                     id={chatLine.id}
                                     className="chatLine"
                                     style={{
-                                        border: chatLine.first ? "2px solid white" : "1px solid black",
+                                        border: chatLine.first ? "2px solid white" : chatLine.gift ? "2px dotted gold" : "",
                                         borderRadius: "10px",
                                         backgroundColor: chatLine.first ? "green" : chatLine.id === highlightedMessageId ? "gray" : "",
                                         fontWeight: chatLine.first ? "bold" : "normal",

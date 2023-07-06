@@ -2,6 +2,7 @@
 
 use tauri::{App, Manager, SystemTrayMenuItem};
 use tauri::{CustomMenuItem, SystemTray, SystemTrayEvent, SystemTrayMenu};
+use tauri_plugin_window_state::Builder as WindowStateBuilder; // New import
 
 fn main() {
     let quit = CustomMenuItem::new("quit".to_string(), "Quit");
@@ -9,6 +10,7 @@ fn main() {
         .add_item(quit)
         .add_native_item(SystemTrayMenuItem::Separator);
     tauri::Builder::default()
+        .plugin(WindowStateBuilder::default().build()) // Added this line
         .system_tray(SystemTray::new().with_menu(tray_menu))
         .on_system_tray_event(|app, event| match event {
             SystemTrayEvent::LeftClick { .. } | SystemTrayEvent::RightClick { .. } => {

@@ -55,6 +55,8 @@ export function Main() {
     const [userFilter, setUserFilter] = useState("");
     const [searchString, setSearchString] = useState("");
 
+    const [hoveredMessageId, setHoveredMessageId] = useState(null);
+
     const handleMessageClicked = (messageId: any) => {
         setHighlightedMessageId(messageId);
     };
@@ -187,6 +189,15 @@ export function Main() {
 
         client.connect();
 
+        client.on('subgift', (channel, username, streakMonths, recipient, methods, userstate) => {
+            console.log("SUBGIFT", username, streakMonths, recipient, methods, userstate);
+            //@ts-ignore
+            setChat((prevChat) => {
+                //@ts-ignore
+                return [...prevChat, { user: "ENSBOT", message: `${username} gifted a sub to ${recipient}!!!`, emotes: null, color: "#38D2D9", first: false, id: 1, returningChatter: false, gift: true }];
+            });
+        });
+
         client.on("message", (channel, tags, message, self) => {
 
             const msg: Message = {
@@ -279,9 +290,11 @@ export function Main() {
             <div className="px-4" style={{ display: "flex", flexDirection: "column", justifyContent: "flex-end" }}>
                 <div className="chatBox" ref={chatWindowRef} style={{
                     borderRadius: "15px",
-                    padding: "20px",
+                    padding: "24px",
+                    paddingBottom: "40px",
                     overflowY: "scroll",
-                    maxHeight: "93vh", // Reduced by 5vh to account for footer
+                    overflowX: "hidden",
+                    maxHeight: "90vh", // Reduced by 5vh to account for footer
                     minHeight: "80vh",
                     display: "flex",
                     flexDirection: "column-reverse",
@@ -303,12 +316,12 @@ export function Main() {
                                     id={chatLine.id}
                                     className="chatLine"
                                     style={{
-                                        border: chatLine.first ? "2px solid white" : "1px solid black",
+                                        border: chatLine.first ? "2px solid white" : chatLine.id === hoveredMessageId ? '2px dotted white' : chatLine.gift ? "2px dotted gold" : "",
                                         borderRadius: "10px",
                                         backgroundColor: chatLine.first ? "green" : chatLine.id === highlightedMessageId ? "gray" : "",
                                         fontWeight: chatLine.first ? "bold" : "normal",
                                         fontSize: chatLine.first ? `${fontSize * 1.2}px` : `${fontSize}px`,
-                                        cursor: "pointer"
+                                        cursor: "pointer",
                                     }}
                                     initial={{ opacity: 0, y: -50 }}
                                     animate={{ opacity: 1, y: 0 }}
@@ -317,6 +330,8 @@ export function Main() {
                                         onMessageClick(chatLine.id);
                                         handleMessageClicked(chatLine.id);
                                     }}
+                                    onMouseEnter={() => setHoveredMessageId(chatLine.id)}
+                                    onMouseLeave={() => setHoveredMessageId(null)}
                                 >
                                     {chatLine.first && <PiPlantBold size={`${fontSize * 1.2}px`} color="white" style={{ marginRight: "20px", paddingTop: "5px" }} />}
                                     {chatLine.id === highlightedMessageId && <FaSearch size={`${fontSize * 1.2}px`} color="gold" style={{ padding: "4px" }} />}
@@ -343,7 +358,6 @@ export function Main() {
                     </AnimatePresence>
 
                 </div>
-                <div className="my-7" />
             </div>
             <div style={{
                 position: 'fixed',
@@ -352,8 +366,8 @@ export function Main() {
                 zIndex: 10000, // make sure this is higher than other z-indices
                 cursor: 'pointer', // makes the icon clickable
             }}>
-                <IoIosArrowDown size="3em" onClick={() => onArrowDownClick()} />
-                <AiOutlineClear size="3em" onClick={() => {
+                <IoIosArrowDown size="22" onClick={() => onArrowDownClick()} />
+                <AiOutlineClear size="22" onClick={() => {
                     onUserClearClick();
                     onMessageClick('');
                     handleMessageClicked('');

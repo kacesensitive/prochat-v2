@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from 'react';
 import styles from './control.module.css'
-import { FaEnvelope, FaCog } from 'react-icons/fa';
+import { FaEnvelope, FaCog, FaCheckDouble } from 'react-icons/fa';
 import { AiOutlineClose } from 'react-icons/ai';
 
 export type State = {
@@ -84,8 +84,8 @@ export default function Control() {
         window.__TAURI__.event.emit('search-string-changed', '');
     }
 
-    const handleStreamChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        updateStream(event.target.value);
+    const handleStreamChange = (event: string) => {
+        updateStream(event);
     }
 
     const handleFontSizeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -174,8 +174,9 @@ export default function Control() {
                                 id="stream"
                                 name="stream"
                                 value={stream}
-                                onChange={handleStreamChange}
+                                onChange={(event) => setStream(event.target.value)}
                             />
+                            <FaCheckDouble size={20} style={{ color: '#00FFD8', padding: '2px' }} onClick={() => handleStreamChange(stream)} />
                         </div>
                     </>
                 )}
