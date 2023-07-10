@@ -8,12 +8,14 @@ export type State = {
     fontSize: number;
     emojiSize: string;
     useTagColor: boolean;
+    engineerFontSize: number;
 };
 
 let myState: State = {
     fontSize: 14,
     emojiSize: "1.0",
-    useTagColor: true
+    useTagColor: true,
+    engineerFontSize: 14,
 };
 
 function changeState(newState: State): void {
@@ -25,6 +27,7 @@ function changeState(newState: State): void {
 
 export default function Control() {
     const [fontSize, setFontSize] = useState(myState.fontSize);
+    const [engineerFontSize, setEngineerFontSize] = useState(myState.engineerFontSize);
     const [emojiSize, setEmojiSize] = useState(myState.emojiSize);
     const [useTagColor, setUseTagColor] = useState(myState.useTagColor);
     const [stream, setStream] = useState(() => window.localStorage.getItem('stream') || 'EverythingNowShow');
@@ -46,9 +49,10 @@ export default function Control() {
 
     useEffect(() => {
         window.localStorage.setItem('fontSize', String(fontSize));
+        window.localStorage.setItem('engineerFontSize', String(engineerFontSize));
         window.localStorage.setItem('emojiSize', emojiSize);
         window.localStorage.setItem('useTagColor', String(useTagColor));
-    }, [fontSize, emojiSize, useTagColor]);
+    }, [fontSize, engineerFontSize, emojiSize, useTagColor]);
 
     const handleSend = () => {
         if (isVisible) {
@@ -92,6 +96,12 @@ export default function Control() {
         const newFontSize = Number(event.target.value);
         setFontSize(newFontSize);
         changeState({ ...myState, fontSize: newFontSize });
+    }
+
+    const handleEngineerFontSizeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const newEngineerFontSize = Number(event.target.value);
+        setEngineerFontSize(newEngineerFontSize);
+        changeState({ ...myState, engineerFontSize: newEngineerFontSize });
     }
 
     const handleEmojiSizeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
@@ -148,6 +158,18 @@ export default function Control() {
                                 max="60"
                                 value={fontSize}
                                 onChange={handleFontSizeChange}
+                            />
+                        </div>
+                        <div className={styles.field}>
+                            <label htmlFor="engineerFontSize">Engineer Font Size: {engineerFontSize}</label>
+                            <input
+                                type="range"
+                                id="engineerFontSize"
+                                name="engineerFontSize"
+                                min="10"
+                                max="60"
+                                value={engineerFontSize}
+                                onChange={handleEngineerFontSizeChange}
                             />
                         </div>
                         <div className={styles.field}>

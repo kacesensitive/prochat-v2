@@ -41,10 +41,12 @@ export function Main() {
     const firstMessageUsersRef = useRef([]);
     // Retrieve stored settings from local storage
     const initialFontSize = parseInt(window.localStorage.getItem('fontSize') || '14');
+    const initialEngineerFontSize = parseInt(window.localStorage.getItem('engineerFontSize') || '14');
     const initialEmojiSize = window.localStorage.getItem('emojiSize') || '1.0';
     const initialUseTagColor = window.localStorage.getItem('useTagColor') === 'true';
 
     const [fontSize, setFontSize] = useState(initialFontSize);
+    const [engineerFontSize, setEngineerFontSize] = useState(initialEngineerFontSize);
     const settingsRef = useRef<HTMLDivElement | null>(null);
     const [emojiSize, setEmojiSize] = useState(initialEmojiSize);
     const [useTagColor, setUseTagColor] = useState(initialUseTagColor);
@@ -113,6 +115,7 @@ export function Main() {
         emojiSize: "1.0",
         useTagColor: true,
         fontSize: 14,
+        engineerFontSize: 14,
     };
 
     //@ts-ignore
@@ -120,6 +123,7 @@ export function Main() {
         const newState = JSON.parse(window.localStorage.getItem('myState') || '{}') as State;
         myState = newState;
         setFontSize(myState.fontSize); // update font size here
+        setEngineerFontSize(myState.engineerFontSize); // update font size here
         setEmojiSize(myState.emojiSize); // update emoji size here
         setUseTagColor(myState.useTagColor); // update useTagColor here
     });
@@ -272,7 +276,7 @@ export function Main() {
                             background: '#2D2D2D',
                             border: '2px solid #FFC300',
                             boxShadow: '2px 2px 8px rgba(0, 0, 0, 0.25)',
-                            fontSize: `${fontSize * 2}px`,
+                            fontSize: `${engineerFontSize * 2}px`,
                             fontWeight: 'bold',
                             textAlign: 'center',
                             padding: '10px',
@@ -298,7 +302,7 @@ export function Main() {
                     minHeight: "80vh",
                     display: "flex",
                     flexDirection: "column-reverse",
-                    fontSize: `${fontSize}px`,
+                    fontSize: `${engineerFontSize}px`,
                     boxShadow: "0px 0px 10px 0px rgba(0,0,0,0.75)",
                     position: 'relative',
                     scrollbarWidth: 'none', // for Firefox
@@ -320,7 +324,7 @@ export function Main() {
                                         borderRadius: "10px",
                                         backgroundColor: chatLine.first ? "green" : chatLine.id === highlightedMessageId ? "gray" : "",
                                         fontWeight: chatLine.first ? "bold" : "normal",
-                                        fontSize: chatLine.first ? `${fontSize * 1.2}px` : `${fontSize}px`,
+                                        fontSize: chatLine.first ? `${engineerFontSize * 1.2}px` : `${engineerFontSize}px`,
                                         cursor: "pointer",
                                     }}
                                     initial={{ opacity: 0, y: -50 }}
@@ -333,8 +337,8 @@ export function Main() {
                                     onMouseEnter={() => setHoveredMessageId(chatLine.id)}
                                     onMouseLeave={() => setHoveredMessageId(null)}
                                 >
-                                    {chatLine.first && <PiPlantBold size={`${fontSize * 1.2}px`} color="white" style={{ marginRight: "20px", paddingTop: "5px" }} />}
-                                    {chatLine.id === highlightedMessageId && <FaSearch size={`${fontSize * 1.2}px`} color="gold" style={{ padding: "4px" }} />}
+                                    {chatLine.first && <PiPlantBold size={`${engineerFontSize * 1.2}px`} color="white" style={{ marginRight: "20px", paddingTop: "5px" }} />}
+                                    {chatLine.id === highlightedMessageId && <FaSearch size={`${engineerFontSize * 1.2}px`} color="gold" style={{ padding: "4px" }} />}
                                     <span className="username"
                                         onClick={(e: any) => {
                                             onUserClick(chatLine.user);
@@ -344,14 +348,14 @@ export function Main() {
                                         }
                                         style={{
                                             fontWeight: "bold", color: chatLine.first ? "white" : chatLine.id === highlightedMessageId ? "#FFC100" : useTagColor ? chatLine.color : "",
-                                            fontSize: chatLine.id === highlightedMessageId ? `${fontSize * 1.6}px` : fontSize
+                                            fontSize: chatLine.id === highlightedMessageId ? `${engineerFontSize * 1.6}px` : engineerFontSize
                                         }}>{chatLine.user}: </span>
                                     <span className="message" dangerouslySetInnerHTML={{
                                         __html: Autolinker.link(parse(chatLine.message, chatLine.emotes, options), {
                                             className: 'apple',
                                         }),
                                     }} style={{
-                                        fontSize: chatLine.id === highlightedMessageId ? `${fontSize * 1.6}px` : fontSize
+                                        fontSize: chatLine.id === highlightedMessageId ? `${engineerFontSize * 1.6}px` : engineerFontSize
                                     }} />
                                 </motion.div>
                             )).reverse()}

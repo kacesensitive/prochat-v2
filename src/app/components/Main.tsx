@@ -62,6 +62,7 @@ export function Main() {
         emojiSize: "1.0",
         useTagColor: true,
         fontSize: 14,
+        engineerFontSize: 14,
     };
 
     //@ts-ignore
