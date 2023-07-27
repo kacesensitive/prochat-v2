@@ -9,10 +9,15 @@
   },
   "package": {
     "productName": "prochat-app-v2",
-    "version": "2.4.1"
+    "version": "2.4.2"
   },
   "tauri": {
     "allowlist": {
+      "clipboard": {
+        "all": true,
+        "writeText": true,
+        "readText": true
+      },
       "all": false
     },
     "systemTray": {

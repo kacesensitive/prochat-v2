@@ -12,6 +12,8 @@ import { IoIosArrowDown } from "react-icons/io";
 import { TbUserPlus } from "react-icons/tb";
 import { AiOutlineClear } from "react-icons/ai";
 import { PiPlantBold } from "react-icons/pi";
+import { writeText } from '@tauri-apps/api/clipboard';
+
 
 interface Message {
     id: string | undefined;
@@ -331,11 +333,27 @@ export function Main() {
                                     animate={{ opacity: 1, y: 0 }}
                                     exit={{ opacity: 0, y: -50 }}
                                     onClick={() => {
-                                        onMessageClick(chatLine.id);
-                                        handleMessageClicked(chatLine.id);
+                                        onUserClearClick();
+                                        onMessageClick('');
+                                        handleMessageClicked('');
+                                        // sleep for 100ms to allow the user filter to clear
+                                        setTimeout(() => {
+                                            onMessageClick(chatLine.id);
+                                            handleMessageClicked(chatLine.id);
+                                        }, 100);
                                     }}
                                     onMouseEnter={() => setHoveredMessageId(chatLine.id)}
                                     onMouseLeave={() => setHoveredMessageId(null)}
+                                    onContextMenu={async (e) => {
+                                        e.preventDefault();
+                                        try {
+                                            const fullMessage = `${chatLine.message} - ${chatLine.user}`;
+                                            await writeText(fullMessage);
+                                            console.log('Copy command was successful');
+                                        } catch (err) {
+                                            console.error('Could not copy text: ', err);
+                                        }
+                                    }}
                                 >
                                     {chatLine.first && <PiPlantBold size={`${engineerFontSize * 1.2}px`} color="white" style={{ marginRight: "20px", paddingTop: "5px" }} />}
                                     {chatLine.id === highlightedMessageId && <FaSearch size={`${engineerFontSize * 1.2}px`} color="gold" style={{ padding: "4px" }} />}
@@ -356,7 +374,17 @@ export function Main() {
                                         }),
                                     }} style={{
                                         fontSize: chatLine.id === highlightedMessageId ? `${engineerFontSize * 1.6}px` : engineerFontSize
-                                    }} />
+                                    }}
+                                        onContextMenu={async (e) => {
+                                            e.preventDefault();
+                                            try {
+                                                const fullMessage = `${chatLine.message} - ${chatLine.user}`;
+                                                await writeText(fullMessage);
+                                                console.log('Copy command was successful');
+                                            } catch (err) {
+                                                console.error('Could not copy text: ', err);
+                                            }
+                                        }} />
                                 </motion.div>
                             )).reverse()}
                     </AnimatePresence>
