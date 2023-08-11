@@ -1,6 +1,6 @@
-# ProChat App v2: For Streamers
+# ProChat
 
-ProChat App v2 is a powerful tool designed specifically for streamers, allowing them to effectively monitor their chat during performances, ensuring a seamless experience for both the performer and their audience.
+ProChat is a tool for streamers, allowing them to effectively monitor their chat during performances, ensuring a seamless experience for both the performer and their audience.
 
 ## Features:
 
