@@ -13,6 +13,7 @@ import { TbUserPlus } from "react-icons/tb";
 import { AiOutlineClear } from "react-icons/ai";
 import { PiPlantBold } from "react-icons/pi";
 import { writeText } from '@tauri-apps/api/clipboard';
+import { isDark, lightenColor } from "./Main";
 
 
 interface Message {
@@ -333,14 +334,19 @@ export function Main() {
                                     animate={{ opacity: 1, y: 0 }}
                                     exit={{ opacity: 0, y: -50 }}
                                     onClick={() => {
-                                        onUserClearClick();
-                                        onMessageClick('');
-                                        handleMessageClicked('');
-                                        // sleep for 100ms to allow the user filter to clear
-                                        setTimeout(() => {
-                                            onMessageClick(chatLine.id);
-                                            handleMessageClicked(chatLine.id);
-                                        }, 100);
+                                        if (highlightedMessageId === chatLine.id) {
+                                            onMessageClick('');
+                                            handleMessageClicked('');
+                                        } else {
+                                            onUserClearClick();
+                                            onMessageClick('');
+                                            handleMessageClicked('');
+                                            // sleep for 100ms to allow the user filter to clear
+                                            setTimeout(() => {
+                                                onMessageClick(chatLine.id);
+                                                handleMessageClicked(chatLine.id);
+                                            }, 100);
+                                        }
                                     }}
                                     onMouseEnter={() => setHoveredMessageId(chatLine.id)}
                                     onMouseLeave={() => setHoveredMessageId(null)}
@@ -359,13 +365,22 @@ export function Main() {
                                     {chatLine.id === highlightedMessageId && <FaSearch size={`${engineerFontSize * 1.2}px`} color="gold" style={{ padding: "4px" }} />}
                                     <span className="username"
                                         onClick={(e: any) => {
-                                            onUserClick(chatLine.user);
-                                            handleUserClicked(chatLine.user);
-                                            e.stopPropagation();
+                                            console.log("User clicked: " + chatLine.user);
+                                            console.log("User filter: " + userFilter);
+                                            if (userFilter !== chatLine.user) {
+                                                onUserClick(chatLine.user);
+                                                handleUserClicked(chatLine.user);
+                                                e.stopPropagation();
+                                            } else {
+                                                onUserClick('');
+                                                handleUserClearClicked();
+                                                e.stopPropagation();
+                                            }
                                         }
                                         }
                                         style={{
-                                            fontWeight: "bold", color: chatLine.first ? "white" : chatLine.id === highlightedMessageId ? "#FFC100" : useTagColor ? chatLine.color : "",
+                                            fontWeight: "bold",
+                                            color: chatLine.first ? "white" : chatLine.id === highlightedMessageId ? "#FFC100" : useTagColor ? isDark(chatLine.color) ? lightenColor(chatLine.color, 40) : chatLine.color : "white",
                                             fontSize: chatLine.id === highlightedMessageId ? `${engineerFontSize * 1.6}px` : engineerFontSize
                                         }}>{chatLine.user}: </span>
                                     <span className="message" dangerouslySetInnerHTML={{

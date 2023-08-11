@@ -31,6 +31,31 @@ interface ControlMessage {
     shown: boolean;
 }
 
+export function isDark(color: any) {
+    if (color === undefined || color === null) {
+        return false;
+    }
+    var c = color.substring(1);  // strip #
+    var rgb = parseInt(c, 16);   // convert rrggbb to decimal
+    var r = (rgb >> 16) & 0xff;  // extract red
+    var g = (rgb >> 8) & 0xff;  // extract green
+    var b = (rgb >> 0) & 0xff;  // extract blue
+
+    var luma = 0.2126 * r + 0.7152 * g + 0.0722 * b; // per ITU-R BT.709
+
+    return luma < 60;
+}
+
+export function lightenColor(color: any, percent: any) {
+    var num = parseInt(color.replace("#", ""), 16),
+        amt = Math.round(2.55 * percent),
+        R = (num >> 16) + amt,
+        G = (num >> 8 & 0x00FF) + amt,
+        B = (num & 0x0000FF) + amt;
+    return "#" + (0x1000000 + (R < 255 ? R < 1 ? 0 : R : 255) * 0x10000 + (G < 255 ? G < 1 ? 0 : G : 255) * 0x100 + (B < 255 ? B < 1 ? 0 : B : 255)).toString(16).slice(1);
+}
+
+
 export function Main() {
     const [chat, setChat] = useState([]);
     const [firstMessageUsers, setFirstMessageUsers] = useState([]);
@@ -183,6 +208,8 @@ export function Main() {
 
         client.on("message", (channel, tags, message, self) => {
 
+            console.log(JSON.stringify(tags));
+
             const msg: Message = {
                 id: tags?.id,
                 username: tags['display-name'],
@@ -307,7 +334,8 @@ export function Main() {
                                     {chatLine.first && <PiPlantBold size={`${fontSize * 1.2}px`} color="white" style={{ marginRight: "20px", paddingTop: "5px" }} />}
                                     {chatLine.id === highlightedMessageId && <FaSearch size={`${fontSize * 1.2}px`} color="gold" style={{ padding: "4px" }} />}
                                     <span className="username" style={{
-                                        fontWeight: "bold", color: chatLine.first ? "white" : chatLine.id === highlightedMessageId ? "#FFC100" : useTagColor ? chatLine.color : "",
+                                        fontWeight: "bold",
+                                        color: chatLine.first ? "white" : chatLine.id === highlightedMessageId ? "#FFC100" : useTagColor ? isDark(chatLine.color) ? lightenColor(chatLine.color, 40) : chatLine.color : "white",
                                         fontSize: chatLine.id === highlightedMessageId ? `${fontSize * 1.6}px` : fontSize
                                     }}>{chatLine.user}: </span>
                                     <span className="message" dangerouslySetInnerHTML={{
