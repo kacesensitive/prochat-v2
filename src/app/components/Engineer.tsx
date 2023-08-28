@@ -4,12 +4,9 @@ import tmi from "tmi.js";
 import { EmoteOptions, parse } from 'simple-tmi-emotes';
 import { AnimatePresence, motion } from "framer-motion";
 import Autolinker from 'autolinker';
-import { invoke } from "@tauri-apps/api/tauri";
 import Control, { State } from "./Control";
 import { FaSearch } from 'react-icons/fa';
-import { BsFill1CircleFill } from "react-icons/bs";
 import { IoIosArrowDown } from "react-icons/io";
-import { TbUserPlus } from "react-icons/tb";
 import { AiOutlineClear } from "react-icons/ai";
 import { PiPlantBold } from "react-icons/pi";
 import { writeText } from '@tauri-apps/api/clipboard';
@@ -50,7 +47,6 @@ export function Main() {
 
     const [fontSize, setFontSize] = useState(initialFontSize);
     const [engineerFontSize, setEngineerFontSize] = useState(initialEngineerFontSize);
-    const settingsRef = useRef<HTMLDivElement | null>(null);
     const [emojiSize, setEmojiSize] = useState(initialEmojiSize);
     const [useTagColor, setUseTagColor] = useState(initialUseTagColor);
     const [stream, setStream] = useState(() => window.localStorage.getItem('stream') || 'EverythingNowShow');
@@ -132,56 +128,30 @@ export function Main() {
     });
 
     useEffect(() => {
-        let isSubscribed = true; // Local variable
+        let isSubscribed = true;
 
-        // Existing 'control-message' listener
-        const controlMessageHandler = (message: string) => {
+        const setControlMessageHandler = (message: string) => {
             if (isSubscribed) {
-                setControlMessage({
-                    message,
-                    shown: true,
-                });
+                setControlMessage({ message, shown: true });
+                setMessageShown(true);
             }
         };
-        //@ts-ignore
-        window.__TAURI__.event.listen('control-message', controlMessageHandler);
 
-        // New 'show-control-message' listener
-        const showControlMessageHandler = (message: string) => {
-            if (isSubscribed) {
-                setControlMessage({
-                    message,
-                    shown: true,
-                });
-                setMessageShown(true); // Make sure message is shown
-            }
-        };
-        //@ts-ignore
-        window.__TAURI__.event.listen('show-control-message', showControlMessageHandler);
+        const listeners = [
+            { event: 'control-message', handler: setControlMessageHandler },
+            { event: 'show-control-message', handler: setControlMessageHandler },
+            { event: 'hide-control-message', handler: () => setMessageShown(false) },
+            { event: 'search-string-changed', handler: (string: any) => setSearchString(string.payload) },
+        ];
 
-        // New 'hide-control-message' listener
-        const hideControlMessageHandler = () => {
-            if (isSubscribed) {
-                setMessageShown(false); // Hide the message
-            }
-        };
-        //@ts-ignore
-        window.__TAURI__.event.listen('hide-control-message', hideControlMessageHandler);
+        listeners.forEach(({ event, handler }) => {
+            //@ts-ignore
+            window.__TAURI__.event.listen(event, handler);
+        });
 
-        // New 'search-string-changed' listener
-        const searchStringChanged = (string: any) => {
-            if (isSubscribed) {
-                setSearchString(string.payload);
-            }
-        };
-        //@ts-ignore
-        window.__TAURI__.event.listen('search-string-changed', searchStringChanged);
-
-        return () => {
-            // No event listener removal, but prevent state update when component is unmounted
-            isSubscribed = false;
-        };
+        return () => { isSubscribed = false; };
     }, []);
+
 
     //@ts-ignore
     useEffect(() => {
@@ -267,31 +237,37 @@ export function Main() {
             top: '50%',
             left: '50%',
             transform: 'translate(-50%, -50%)',
-            zIndex: 9999
+            zIndex: 9999,
         }}>
             <AnimatePresence>
-                {messageShown && controlMessage?.message && (
-                    <motion.div
-                        initial={{ opacity: 0, y: -50 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -50 }}
-                        style={{
-                            background: '#2D2D2D',
-                            border: '2px solid #FFC300',
-                            boxShadow: '2px 2px 8px rgba(0, 0, 0, 0.25)',
-                            fontSize: `${engineerFontSize * 2}px`,
-                            fontWeight: 'bold',
-                            textAlign: 'center',
-                            padding: '10px',
-                            borderRadius: '10px',
-                        }}
-                    >
-                        {
-                            //@ts-ignore
-                            controlMessage.message.payload
-                        }
-                    </motion.div>
-                )}
+                <div style={
+                    {
+                        bottom: 1
+                    }
+                }>
+                    {messageShown && controlMessage?.message && (
+                        <motion.div
+                            initial={{ opacity: 0, y: -50 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -50 }}
+                            style={{
+                                background: '#2D2D2D',
+                                border: '2px solid #FFC300',
+                                boxShadow: '2px 2px 8px rgba(0, 0, 0, 0.25)',
+                                fontSize: `${engineerFontSize * 2}px`,
+                                fontWeight: 'bold',
+                                textAlign: 'center',
+                                padding: '10px',
+                                borderRadius: '10px',
+                            }}
+                        >
+                            {
+                                //@ts-ignore
+                                controlMessage.message.payload
+                            }
+                        </motion.div>
+                    )}
+                </div>
             </AnimatePresence>
         </div>
             <div className="px-4" style={{ display: "flex", flexDirection: "column", justifyContent: "flex-end" }}>
@@ -410,8 +386,8 @@ export function Main() {
                 position: 'fixed',
                 right: '3em',
                 bottom: '1em',
-                zIndex: 10000, // make sure this is higher than other z-indices
-                cursor: 'pointer', // makes the icon clickable
+                zIndex: 10000,
+                cursor: 'pointer',
             }}>
                 <IoIosArrowDown size="22" onClick={() => onArrowDownClick()} />
                 <AiOutlineClear size="22" onClick={() => {

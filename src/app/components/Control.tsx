@@ -129,7 +129,9 @@ export default function Control() {
                         value={message}
                         onChange={handleMessageChange}
                     />
-                    <button onClick={handleSend}>
+                    <button onClick={handleSend} style={{
+                        cursor: 'pointer',
+                    }}>
                         {isVisible ? <FaEnvelope size={20} style={{ color: '#00FFD8', padding: '2px' }} /> : <FaEnvelope size={20} style={{ color: 'white', padding: '4px' }} />}
                     </button>
                 </div>
@@ -142,7 +144,7 @@ export default function Control() {
                         value={searchString}
                         onChange={handleSearchStringChange}
                     />
-                    <button onClick={clearSearchString} style={{ marginLeft: '10px' }}>
+                    <button onClick={clearSearchString} style={{ marginLeft: '10px', cursor: 'pointer', }}>
                         <AiOutlineClose size={20} />
                     </button>
                 </div>
@@ -198,7 +200,7 @@ export default function Control() {
                                 value={stream}
                                 onChange={(event) => setStream(event.target.value)}
                             />
-                            <FaCheckDouble size={20} style={{ color: '#00FFD8', padding: '2px' }} onClick={() => handleStreamChange(stream)} />
+                            <FaCheckDouble size={20} style={{ color: '#00FFD8', padding: '2px', cursor: 'pointer' }} onClick={() => handleStreamChange(stream)} />
                         </div>
                     </>
                 )}

@@ -2,8 +2,6 @@
     display: flex;
     flex-direction: column;
     justify-content: space-around;
-    /* Use space-between for no space around outer elements */
-    /* 100% of the viewport height */
     align-items: flex-start;
     gap: 10px;
     background-image: url('/dragon-scales.svg');

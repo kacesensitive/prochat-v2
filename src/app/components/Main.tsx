@@ -35,13 +35,13 @@ export function isDark(color: any) {
     if (color === undefined || color === null) {
         return false;
     }
-    var c = color.substring(1);  // strip #
-    var rgb = parseInt(c, 16);   // convert rrggbb to decimal
-    var r = (rgb >> 16) & 0xff;  // extract red
-    var g = (rgb >> 8) & 0xff;  // extract green
-    var b = (rgb >> 0) & 0xff;  // extract blue
+    var c = color.substring(1);
+    var rgb = parseInt(c, 16);
+    var r = (rgb >> 16) & 0xff;
+    var g = (rgb >> 8) & 0xff;
+    var b = (rgb >> 0) & 0xff;
 
-    var luma = 0.2126 * r + 0.7152 * g + 0.0722 * b; // per ITU-R BT.709
+    var luma = 0.2126 * r + 0.7152 * g + 0.0722 * b;
 
     return luma < 60;
 }
@@ -60,7 +60,6 @@ export function Main() {
     const [chat, setChat] = useState([]);
     const [firstMessageUsers, setFirstMessageUsers] = useState([]);
     const firstMessageUsersRef = useRef([]);
-    // Retrieve stored settings from local storage
     const initialFontSize = parseInt(window.localStorage.getItem('fontSize') || '14');
     const initialEmojiSize = window.localStorage.getItem('emojiSize') || '1.0';
     const initialUseTagColor = window.localStorage.getItem('useTagColor') === 'true';
@@ -70,7 +69,7 @@ export function Main() {
     const [emojiSize, setEmojiSize] = useState(initialEmojiSize);
     const [useTagColor, setUseTagColor] = useState(initialUseTagColor);
     const [stream, setStream] = useState(() => window.localStorage.getItem('stream') || 'EverythingNowShow');
-    const [controlMessage, setControlMessage] = useState<ControlMessage | null>(null); // Single control message instead of an array
+    const [controlMessage, setControlMessage] = useState<ControlMessage | null>(null);
     const [messageShown, setMessageShown] = useState(false);
     const [highlightedMessageId, setHighlightedMessageId] = useState(null);
     const [userFilter, setUserFilter] = useState("");
@@ -94,9 +93,9 @@ export function Main() {
     window.__TAURI__.event.listen('state-changed', () => {
         const newState = JSON.parse(window.localStorage.getItem('myState') || '{}') as State;
         myState = newState;
-        setFontSize(myState.fontSize); // update font size here
-        setEmojiSize(myState.emojiSize); // update emoji size here
-        setUseTagColor(myState.useTagColor); // update useTagColor here
+        setFontSize(myState.fontSize);
+        setEmojiSize(myState.emojiSize);
+        setUseTagColor(myState.useTagColor);
         console.log(myState);
     });
 
@@ -111,9 +110,7 @@ export function Main() {
     };
 
     useEffect(() => {
-        let isSubscribed = true; // Local variable
-
-        // Existing 'control-message' listener
+        let isSubscribed = true;
         const controlMessageHandler = (message: string) => {
             if (isSubscribed) {
                 setControlMessage({
@@ -124,24 +121,20 @@ export function Main() {
         };
         //@ts-ignore
         window.__TAURI__.event.listen('control-message', controlMessageHandler);
-
-        // New 'show-control-message' listener
         const showControlMessageHandler = (message: string) => {
             if (isSubscribed) {
                 setControlMessage({
                     message,
                     shown: true,
                 });
-                setMessageShown(true); // Make sure message is shown
+                setMessageShown(true);
             }
         };
         //@ts-ignore
         window.__TAURI__.event.listen('show-control-message', showControlMessageHandler);
-
-        // New 'hide-control-message' listener
         const hideControlMessageHandler = () => {
             if (isSubscribed) {
-                setMessageShown(false); // Hide the message
+                setMessageShown(false);
             }
         };
         //@ts-ignore
@@ -179,7 +172,6 @@ export function Main() {
         });
 
         return () => {
-            // No event listener removal, but prevent state update when component is unmounted
             isSubscribed = false;
         };
     }, []);
@@ -309,8 +301,8 @@ export function Main() {
                     fontSize: `${fontSize}px`,
                     boxShadow: "0px 0px 10px 0px rgba(0,0,0,0.75)",
                     position: 'relative',
-                    scrollbarWidth: 'none', // for Firefox
-                    msOverflowStyle: 'none', // for Internet Explorer and Edge
+                    scrollbarWidth: 'none',
+                    msOverflowStyle: 'none',
                 }}>
                     <AnimatePresence>
                         {chat.filter((chatLine: any) => highlightedMessageId ? chatLine.id === highlightedMessageId : (userFilter === "" || chatLine.user === userFilter))
