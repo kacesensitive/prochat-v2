@@ -6,7 +6,7 @@ It is mainly meant for a team consisting of an engineer and a performer. ProChat
 - Engineer - Controls the style, filters, custom messages, etc
 ![Engineer](engineer.gif)
 - Performer - Views the chat, highlights, and custom messages from the engineer
-![Performer](performer.gif)
+![Performer](perform.gif)
 
 ## Features:
 
