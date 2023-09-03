@@ -39,7 +39,6 @@ export function Main() {
     const [chat, setChat] = useState([]);
     const [firstMessageUsers, setFirstMessageUsers] = useState([]);
     const firstMessageUsersRef = useRef([]);
-    // Retrieve stored settings from local storage
     const initialFontSize = parseInt(window.localStorage.getItem('fontSize') || '14');
     const initialEngineerFontSize = parseInt(window.localStorage.getItem('engineerFontSize') || '14');
     const initialEmojiSize = window.localStorage.getItem('emojiSize') || '1.0';
@@ -50,7 +49,7 @@ export function Main() {
     const [emojiSize, setEmojiSize] = useState(initialEmojiSize);
     const [useTagColor, setUseTagColor] = useState(initialUseTagColor);
     const [stream, setStream] = useState(() => window.localStorage.getItem('stream') || 'EverythingNowShow');
-    const [controlMessage, setControlMessage] = useState<ControlMessage | null>(null); // Single control message instead of an array
+    const [controlMessage, setControlMessage] = useState<ControlMessage | null>(null);
     const [messageShown, setMessageShown] = useState(false);
     const [highlightedMessageId, setHighlightedMessageId] = useState(null);
     const [userFilter, setUserFilter] = useState("");
@@ -102,8 +101,6 @@ export function Main() {
     const onArrowDownClick = () => {
         //@ts-ignore
         window.__TAURI__.event.emit("snap-down");
-
-        // Scroll to the bottom of chat window
         if (chatWindowRef.current) {
             //@ts-ignore
             chatWindowRef.current.scrollTop = chatWindowRef.current.scrollHeight;
@@ -121,10 +118,10 @@ export function Main() {
     window.__TAURI__.event.listen('state-changed', () => {
         const newState = JSON.parse(window.localStorage.getItem('myState') || '{}') as State;
         myState = newState;
-        setFontSize(myState.fontSize); // update font size here
-        setEngineerFontSize(myState.engineerFontSize); // update font size here
-        setEmojiSize(myState.emojiSize); // update emoji size here
-        setUseTagColor(myState.useTagColor); // update useTagColor here
+        setFontSize(myState.fontSize);
+        setEngineerFontSize(myState.engineerFontSize);
+        setEmojiSize(myState.emojiSize);
+        setUseTagColor(myState.useTagColor);
     });
 
     useEffect(() => {
@@ -277,15 +274,15 @@ export function Main() {
                     paddingBottom: "40px",
                     overflowY: "scroll",
                     overflowX: "hidden",
-                    maxHeight: "90vh", // Reduced by 5vh to account for footer
+                    maxHeight: "90vh",
                     minHeight: "80vh",
                     display: "flex",
                     flexDirection: "column-reverse",
                     fontSize: `${engineerFontSize}px`,
                     boxShadow: "0px 0px 10px 0px rgba(0,0,0,0.75)",
                     position: 'relative',
-                    scrollbarWidth: 'none', // for Firefox
-                    msOverflowStyle: 'none', // for Internet Explorer and Edge
+                    scrollbarWidth: 'none',
+                    msOverflowStyle: 'none',
                 }}>
                     <AnimatePresence>
                         {chat.filter(chatLine =>
@@ -317,7 +314,7 @@ export function Main() {
                                             onUserClearClick();
                                             onMessageClick('');
                                             handleMessageClicked('');
-                                            // sleep for 100ms to allow the user filter to clear
+
                                             setTimeout(() => {
                                                 onMessageClick(chatLine.id);
                                                 handleMessageClicked(chatLine.id);
@@ -329,7 +326,7 @@ export function Main() {
                                     onContextMenu={async (e) => {
                                         e.preventDefault();
                                         try {
-                                            const fullMessage = `${chatLine.message} - ${chatLine.user}`;
+                                            const fullMessage = `${chatLine.message.replace("@EverythingNowShow", "")} - ${chatLine.user}`;
                                             await writeText(fullMessage);
                                             console.log('Copy command was successful');
                                         } catch (err) {

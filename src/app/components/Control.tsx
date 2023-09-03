@@ -116,7 +116,6 @@ export default function Control() {
         changeState({ ...myState, useTagColor: newUseTagColor });
     }
 
-    // ...
     return (
         <main className={styles.main} style={{ height: isSettingsVisible ? 'auto' : '10vh' }}>
             <div className={styles.controls}>
