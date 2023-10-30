@@ -9,7 +9,7 @@
   },
   "package": {
     "productName": "prochat-app-v2",
-    "version": "2.4.5"
+    "version": "2.5.5"
   },
   "tauri": {
     "macOSPrivateApi": true,
@@ -59,7 +59,7 @@
       }
     },
     "security": {
-      "csp": null
+      "csp": ""
     },
     "updater": {
       "active": false
@@ -84,27 +84,6 @@
         "fullscreen": false,
         "transparent": false,
         "url": "/engineer"
-      },
-      {
-        "title": "ProChat Image Selector",
-        "label": "prochat-app-v2-image",
-        "width": 800,
-        "height": 600,
-        "resizable": true,
-        "fullscreen": false,
-        "transparent": false,
-        "url": "/images"
-      },
-      {
-        "title": "ProChat Image Viewer",
-        "label": "prochat-app-v2-image-view",
-        "width": 800,
-        "height": 600,
-        "resizable": true,
-        "fullscreen": false,
-        "transparent": true,
-        "alwaysOnTop": true,
-        "url": "/image"
       }
     ]
   }

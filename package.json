@@ -1,12 +1,19 @@
 {
   "name": "prochat-app-v2",
-  "version": "2.4.5",
+  "version": "2.5.5",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
+  },
+  "browser": {
+    "fs": false,
+    "path": false,
+    "os": false,
+    "net": false,
+    "tls": false
   },
   "dependencies": {
     "@types/node": "20.3.1",
@@ -22,7 +29,8 @@
     "react-icons": "^4.10.1",
     "simple-tmi-emotes": "^1.1.1",
     "tmi.js": "^1.8.5",
-    "typescript": "5.1.3"
+    "typescript": "5.1.3",
+    "youtube-chat": "^2.2.0"
   },
   "devDependencies": {
     "@tauri-apps/api": "^1.4.0",

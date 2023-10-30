@@ -31,6 +31,8 @@ export default function Control() {
     const [emojiSize, setEmojiSize] = useState(myState.emojiSize);
     const [useTagColor, setUseTagColor] = useState(myState.useTagColor);
     const [stream, setStream] = useState(() => window.localStorage.getItem('stream') || 'EverythingNowShow');
+    const [youtubeChannelId, setyoutubeChannelId] = useState(() => window.localStorage.getItem('youtubeChannelId') || 'UC7Po7K12YTOE5jNYYE0kKaA');
+    const [youtubeApiKey, setyoutubeApiKey] = useState(() => window.localStorage.getItem('youtubeApiKey') || 'apikey');
     const [message, setMessage] = useState('');
     const [isVisible, setIsVisible] = useState(false);
     const [searchString, setSearchString] = useState('');
@@ -76,6 +78,20 @@ export default function Control() {
         window.__TAURI__.event.emit('stream-changed');
     }
 
+    const updateYoutubeChannelId = (newChannelId: string) => {
+        setyoutubeChannelId(newChannelId);
+        window.localStorage.setItem('youtubeChannelId', newChannelId);
+        //@ts-ignore
+        window.__TAURI__.event.emit('channel-changed');
+    }
+
+    const updateYoutubeApiKey = (newApiKey: string) => {
+        setyoutubeApiKey(newApiKey);
+        window.localStorage.setItem('youtubeApiKey', newApiKey);
+        //@ts-ignore
+        window.__TAURI__.event.emit('api-changed');
+    }
+
     const handleSearchStringChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setSearchString(event.target.value);
         //@ts-ignore
@@ -90,6 +106,14 @@ export default function Control() {
 
     const handleStreamChange = (event: string) => {
         updateStream(event);
+    }
+
+    const handleYoutubeChannelChange = (event: string) => {
+        updateYoutubeChannelId(event);
+    }
+
+    const handleYoutubeKeyChange = (event: string) => {
+        updateYoutubeApiKey(event);
     }
 
     const handleFontSizeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -191,7 +215,7 @@ export default function Control() {
                             />
                         </div>
                         <div className={styles.field}>
-                            <label htmlFor="stream">Stream: </label>
+                            <label htmlFor="stream">Twitch Stream: </label>
                             <input
                                 type="text"
                                 id="stream"
@@ -200,6 +224,24 @@ export default function Control() {
                                 onChange={(event) => setStream(event.target.value)}
                             />
                             <FaCheckDouble size={20} style={{ color: '#00FFD8', padding: '2px', cursor: 'pointer' }} onClick={() => handleStreamChange(stream)} />
+                        </div>
+                        <div className={styles.field}>
+                            <label htmlFor="stream">Youtube Channel ID: </label>
+                            <input
+                                type="text"
+                                value={youtubeChannelId}
+                                onChange={(event) => setyoutubeChannelId(event.target.value)}
+                            />
+                            <FaCheckDouble size={20} style={{ color: '#00FFD8', padding: '2px', cursor: 'pointer' }} onClick={() => handleYoutubeChannelChange(youtubeChannelId)} />
+                        </div>
+                        <div className={styles.field}>
+                            <label htmlFor="stream">Youtube API key: </label>
+                            <input
+                                type="text"
+                                value={youtubeApiKey}
+                                onChange={(event) => setyoutubeApiKey(event.target.value)}
+                            />
+                            <FaCheckDouble size={20} style={{ color: '#00FFD8', padding: '2px', cursor: 'pointer' }} onClick={() => handleYoutubeKeyChange(youtubeApiKey)} />
                         </div>
                     </>
                 )}

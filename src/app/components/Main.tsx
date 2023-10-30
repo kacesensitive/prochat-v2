@@ -5,9 +5,9 @@ import { EmoteOptions, parse } from 'simple-tmi-emotes';
 import { AnimatePresence, motion } from "framer-motion";
 import Autolinker from 'autolinker';
 import { State } from "./Control";
-import { FaSearch } from 'react-icons/fa';
-import { BsFill1CircleFill } from "react-icons/bs";
+import { FaSearch, FaTwitch, FaYoutube } from 'react-icons/fa';
 import { PiPlantBold } from "react-icons/pi";
+import { createYouTube, listen } from "../../utils/yt";
 
 interface Message {
     id: string | undefined;
@@ -24,6 +24,7 @@ interface Message {
     turbo: boolean | undefined;
     returningChatter: boolean | undefined;
     firstMessage: boolean | undefined;
+    platform: string;
 }
 
 interface ControlMessage {
@@ -69,6 +70,8 @@ export function Main() {
     const [emojiSize, setEmojiSize] = useState(initialEmojiSize);
     const [useTagColor, setUseTagColor] = useState(initialUseTagColor);
     const [stream, setStream] = useState(() => window.localStorage.getItem('stream') || 'EverythingNowShow');
+    const [youtubeChannelId, setyoutubeChannelId] = useState(() => window.localStorage.getItem('youtubeChannelId') || 'UC7Po7K12YTOE5jNYYE0kKaA');
+    const [youtubeApiKey, setyoutubeApiKey] = useState(() => window.localStorage.getItem('youtubeApiKey') || 'apikey');
     const [controlMessage, setControlMessage] = useState<ControlMessage | null>(null);
     const [messageShown, setMessageShown] = useState(false);
     const [highlightedMessageId, setHighlightedMessageId] = useState(null);
@@ -78,6 +81,16 @@ export function Main() {
         //@ts-ignore
         window.__TAURI__.event.listen('stream-changed', () => {
             setStream(window.localStorage.getItem('stream') || 'EverythingNowShow');
+            window.location.reload();
+        });
+        //@ts-ignore
+        window.__TAURI__.event.listen('channel-changed', () => {
+            setyoutubeChannelId(window.localStorage.getItem('youtubeChannelId') || '');
+            window.location.reload();
+        });
+        //@ts-ignore
+        window.__TAURI__.event.listen('api-changed', () => {
+            setyoutubeApiKey(window.localStorage.getItem('youtubeApiKey') || '');
             window.location.reload();
         });
     }, []);
@@ -96,7 +109,6 @@ export function Main() {
         setFontSize(myState.fontSize);
         setEmojiSize(myState.emojiSize);
         setUseTagColor(myState.useTagColor);
-        console.log(myState);
     });
 
     const chatWindowRef = useRef(null);
@@ -146,7 +158,6 @@ export function Main() {
             }
             const messageElement = document.getElementById(messageId.payload);
             if (messageElement) {
-                console.log('AHHH', messageId.payload);
                 setHighlightedMessageId(messageId.payload);
                 messageElement.scrollIntoView({ behavior: "smooth", block: "start" });
                 window.scrollBy(0, -100);
@@ -187,6 +198,36 @@ export function Main() {
             channels: [stream],
         });
 
+        const yt = createYouTube({
+            channelId: youtubeChannelId,
+            apiKey: youtubeApiKey
+        });
+
+        yt.on('error', (error) => {
+            console.error(`Handled Error: ${error}`);
+        });
+
+        yt.on('message', (data: any) => {
+            setChat((prevChat) => {
+                let newChat = [...prevChat];
+                //@ts-ignore
+                newChat.push({
+                    user: data.authorDetails.displayName,
+                    message: data.snippet.displayMessage,
+                    // generate a random color using the name as the seed
+                    color: '#' + Math.floor(Math.abs(Math.sin(data.authorDetails.displayName.split('').reduce((prev: any, curr: any) => ((prev << 5) - prev) + curr.charCodeAt(0), 0)) * 16777215)).toString(16),
+                    first: false,
+                    id: data.id,
+                    returningChatter: false,
+                    platform: 'youtube'
+                });
+                // Limit chat history to the last 60 messages
+                return newChat.slice(Math.max(newChat.length - 60, 0));
+            });
+        });
+
+        listen(yt, 10000);
+
         client.connect();
 
         client.on('subgift', (channel, username, streakMonths, recipient, methods, userstate) => {
@@ -199,8 +240,6 @@ export function Main() {
         });
 
         client.on("message", (channel, tags, message, self) => {
-
-            console.log(JSON.stringify(tags));
 
             const msg: Message = {
                 id: tags?.id,
@@ -217,6 +256,7 @@ export function Main() {
                 turbo: tags?.turbo,
                 returningChatter: tags?.['returning-chatter'],
                 firstMessage: tags?.['first-msg'],
+                platform: 'twitch'
             };
             let first = false;
 
@@ -238,12 +278,26 @@ export function Main() {
             //@ts-ignore
             setChat((prevChat) => {
                 const lastChat = prevChat[prevChat.length - 1];
+                let newChat = [...prevChat];
                 //@ts-ignore
                 if (lastChat && lastChat.user === tags["display-name"] && lastChat.message === message) {
                     return prevChat;
                 } else {
-                    return [...prevChat, { user: tags["display-name"], message, emotes: tags?.emotes, color: tags?.color, first: first, id: tags?.id, returningChatter: tags?.['returning-chatter'] }];
+                    //@ts-ignore
+                    newChat.push({
+                        user: tags["display-name"],
+                        message,
+                        emotes: tags?.emotes,
+                        color: tags?.color,
+                        first: first,
+                        id: tags?.id,
+                        returningChatter: tags?.['returning-chatter'],
+                        platform: 'twitch'
+                    });
                 }
+
+                // Limit chat history to the last 60 messages
+                return newChat.slice(Math.max(newChat.length - 60, 0));
             });
         });
 
@@ -325,6 +379,8 @@ export function Main() {
                                 >
                                     {chatLine.first && <PiPlantBold size={`${fontSize * 1.2}px`} color="white" style={{ marginRight: "20px", paddingTop: "5px" }} />}
                                     {chatLine.id === highlightedMessageId && <FaSearch size={`${fontSize * 1.2}px`} color="gold" style={{ padding: "4px" }} />}
+                                    {chatLine.platform === 'twitch' && <FaTwitch size={`${fontSize}px`} style={{ marginRight: "10px" }} />}
+                                    {chatLine.platform === 'youtube' && <FaYoutube size={`${fontSize}px`} style={{ marginRight: "10px" }} />}
                                     <span className="username" style={{
                                         fontWeight: "bold",
                                         color: chatLine.first ? "white" : chatLine.id === highlightedMessageId ? "#FFC100" : useTagColor ? isDark(chatLine.color) ? lightenColor(chatLine.color, 40) : chatLine.color : "white",
@@ -340,7 +396,6 @@ export function Main() {
                                 </motion.div>
                             )).reverse()}
                     </AnimatePresence>
-
                 </div>
                 <div className="my-7" />
             </div></>

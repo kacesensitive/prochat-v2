@@ -5,13 +5,13 @@ import { EmoteOptions, parse } from 'simple-tmi-emotes';
 import { AnimatePresence, motion } from "framer-motion";
 import Autolinker from 'autolinker';
 import Control, { State } from "./Control";
-import { FaSearch } from 'react-icons/fa';
+import { FaSearch, FaTwitch, FaYoutube } from 'react-icons/fa';
 import { IoIosArrowDown } from "react-icons/io";
 import { AiOutlineClear } from "react-icons/ai";
 import { PiPlantBold } from "react-icons/pi";
 import { writeText } from '@tauri-apps/api/clipboard';
 import { isDark, lightenColor } from "./Main";
-
+import { createYouTube, listen } from "@/utils/yt";
 
 interface Message {
     id: string | undefined;
@@ -49,6 +49,8 @@ export function Main() {
     const [emojiSize, setEmojiSize] = useState(initialEmojiSize);
     const [useTagColor, setUseTagColor] = useState(initialUseTagColor);
     const [stream, setStream] = useState(() => window.localStorage.getItem('stream') || 'EverythingNowShow');
+    const [youtubeChannelId, setyoutubeChannelId] = useState(() => window.localStorage.getItem('youtubeChannelId') || 'UC7Po7K12YTOE5jNYYE0kKaA');
+    const [youtubeApiKey, setyoutubeApiKey] = useState(() => window.localStorage.getItem('youtubeApiKey') || 'apikey');
     const [controlMessage, setControlMessage] = useState<ControlMessage | null>(null);
     const [messageShown, setMessageShown] = useState(false);
     const [highlightedMessageId, setHighlightedMessageId] = useState(null);
@@ -65,6 +67,16 @@ export function Main() {
         //@ts-ignore
         window.__TAURI__.event.listen('stream-changed', () => {
             setStream(window.localStorage.getItem('stream') || 'EverythingNowShow');
+            window.location.reload();
+        });
+        //@ts-ignore
+        window.__TAURI__.event.listen('channel-changed', () => {
+            setyoutubeChannelId(window.localStorage.getItem('youtubeChannelId') || '');
+            window.location.reload();
+        });
+        //@ts-ignore
+        window.__TAURI__.event.listen('api-changed', () => {
+            setyoutubeApiKey(window.localStorage.getItem('youtubeApiKey') || '');
             window.location.reload();
         });
     }, []);
@@ -152,6 +164,37 @@ export function Main() {
 
     //@ts-ignore
     useEffect(() => {
+
+        const yt = createYouTube({
+            channelId: youtubeChannelId,
+            apiKey: youtubeApiKey
+        });
+
+        yt.on('error', (error) => {
+            console.error(`Handled Error: ${error}`);
+        });
+
+        yt.on('message', (data: any) => {
+            setChat((prevChat) => {
+                let newChat = [...prevChat];
+                //@ts-ignore
+                newChat.push({
+                    user: data.authorDetails.displayName,
+                    message: data.snippet.displayMessage,
+                    // generate a random color using the name as the seed
+                    color: '#' + Math.floor(Math.abs(Math.sin(data.authorDetails.displayName.split('').reduce((prev: any, curr: any) => ((prev << 5) - prev) + curr.charCodeAt(0), 0)) * 16777215)).toString(16),
+                    first: false,
+                    id: data.id,
+                    returningChatter: false,
+                    platform: 'youtube'
+                });
+                // Limit chat history to the last 60 messages
+                return newChat.slice(Math.max(newChat.length - 60, 0));
+            });
+        });
+
+        listen(yt, 10000);
+
         const client = new tmi.Client({
             options: { debug: true },
             connection: {
@@ -198,7 +241,6 @@ export function Main() {
                 firstMessageUsersRef.current = [...firstMessageUsersRef.current, msg.username];
                 setFirstMessageUsers(firstMessageUsersRef.current);
                 console.log('first message1', msg.username);
-                console.log(firstMessageUsersRef.current);
             }
             //@ts-ignore
             if (firstMessageUsersRef.current.includes(msg.username)) {
@@ -210,12 +252,25 @@ export function Main() {
             //@ts-ignore
             setChat((prevChat) => {
                 const lastChat = prevChat[prevChat.length - 1];
+                let newChat = [...prevChat];
                 //@ts-ignore
                 if (lastChat && lastChat.user === tags["display-name"] && lastChat.message === message) {
                     return prevChat;
                 } else {
-                    return [...prevChat, { user: tags["display-name"], message, emotes: tags?.emotes, color: tags?.color, first: first, id: tags?.id, returningChatter: tags?.['returning-chatter'] }];
+                    //@ts-ignore
+                    newChat.push({
+                        user: tags["display-name"],
+                        message,
+                        emotes: tags?.emotes,
+                        color: tags?.color,
+                        first: first,
+                        id: tags?.id,
+                        returningChatter: tags?.['returning-chatter'],
+                        platform: 'twitch',
+                    });
                 }
+
+                return newChat.slice(Math.max(newChat.length - 60, 0));
             });
         });
 
@@ -336,6 +391,8 @@ export function Main() {
                                 >
                                     {chatLine.first && <PiPlantBold size={`${engineerFontSize * 1.2}px`} color="white" style={{ marginRight: "20px", paddingTop: "5px" }} />}
                                     {chatLine.id === highlightedMessageId && <FaSearch size={`${engineerFontSize * 1.2}px`} color="gold" style={{ padding: "4px" }} />}
+                                    {chatLine.platform === 'twitch' && <FaTwitch size={`${engineerFontSize}px`} style={{ marginRight: "10px" }} />}
+                                    {chatLine.platform === 'youtube' && <FaYoutube size={`${engineerFontSize}px`} style={{ marginRight: "10px" }} />}
                                     <span className="username"
                                         onClick={(e: any) => {
                                             console.log("User clicked: " + chatLine.user);
@@ -376,7 +433,6 @@ export function Main() {
                                 </motion.div>
                             )).reverse()}
                     </AnimatePresence>
-
                 </div>
             </div>
             <div style={{
