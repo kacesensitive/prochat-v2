@@ -1,0 +1,20 @@
+{
+    "name": "tiktok-server",
+    "version": "1.0.0",
+    "main": "tiktokserver.js",
+    "bin": "tiktokserver.js",
+    "pkg": {
+        "targets": [
+            "node14-linux-x64",
+            "node14-macos-x64",
+            "node14-win-x64"
+        ],
+        "assets": "node_modules/tiktok-live-connector/dist/proto/*.proto"
+    },
+    "dependencies": {
+        "dotenv": "^16.3.1",
+        "express": "^4.18.2",
+        "socket.io": "^4.7.2",
+        "tiktok-live-connector": "^1.0.5"
+    }
+}

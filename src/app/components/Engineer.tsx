@@ -12,6 +12,7 @@ import { PiPlantBold } from "react-icons/pi";
 import { writeText } from '@tauri-apps/api/clipboard';
 import { isDark, lightenColor } from "./Main";
 import { createYouTube, listen } from "@/utils/yt";
+import { TikTokIOConnection } from "@/utils/tiktok";
 
 interface Message {
     id: string | undefined;
@@ -164,6 +165,40 @@ export function Main() {
 
     //@ts-ignore
     useEffect(() => {
+
+        const connection = new TikTokIOConnection('http://localhost:7011');
+
+        connection.connect('everythingnowshow').then(() => {
+            console.log('Connected to tiktok');
+        }).catch((err) => {
+            console.error('Failed to connect:', err);
+        });
+
+        let msgID: any = null;
+
+        connection.on('chat', (msg) => {
+            setChat((prevChat) => {
+                let newChat = [...prevChat];
+                if (msgID === msg.msgId) {
+                    return prevChat;
+                } else {
+                    msgID = msg.msgId;
+                    //@ts-ignore
+                    newChat.push({
+                        user: msg.nickname,
+                        message: msg.comment,
+                        // generate a random color using the name as the seed
+                        color: '#' + Math.floor(Math.abs(Math.sin(msg.uniqueId.split('').reduce((prev: any, curr: any) => ((prev << 5) - prev) + curr.charCodeAt(0), 0)) * 16777215)).toString(16),
+                        first: false,
+                        id: msg.msgId,
+                        returningChatter: false,
+                        platform: 'tiktok'
+                    });
+                    // Limit chat history to the last 60 messages
+                    return newChat.slice(Math.max(newChat.length - 60, 0));
+                }
+            });
+        });
 
         const yt = createYouTube({
             channelId: youtubeChannelId,
