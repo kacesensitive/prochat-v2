@@ -5,7 +5,7 @@ import { EmoteOptions, parse } from 'simple-tmi-emotes';
 import { AnimatePresence, motion } from "framer-motion";
 import Autolinker from 'autolinker';
 import Control, { State } from "./Control";
-import { FaSearch, FaTwitch, FaYoutube } from 'react-icons/fa';
+import { FaSearch, FaTiktok, FaTwitch, FaYoutube } from 'react-icons/fa';
 import { IoIosArrowDown } from "react-icons/io";
 import { AiOutlineClear } from "react-icons/ai";
 import { PiPlantBold } from "react-icons/pi";
@@ -49,7 +49,7 @@ export function Main() {
     const [emojiSize, setEmojiSize] = useState(initialEmojiSize);
     const [useTagColor, setUseTagColor] = useState(initialUseTagColor);
     const [stream, setStream] = useState(() => window.localStorage.getItem('stream') || 'EverythingNowShow');
-    const [youtubeChannelId, setyoutubeChannelId] = useState(() => window.localStorage.getItem('youtubeChannelId') || 'UC7Po7K12YTOE5jNYYE0kKaA');
+    const [youtubeChannelId, setyoutubeChannelId] = useState(() => window.localStorage.getItem('youtubeChannelId') || 'UC7Po7K12YTOE5jNYYE0kKaA-A');
     const [youtubeApiKey, setyoutubeApiKey] = useState(() => window.localStorage.getItem('youtubeApiKey') || 'apikey');
     const [controlMessage, setControlMessage] = useState<ControlMessage | null>(null);
     const [messageShown, setMessageShown] = useState(false);
@@ -193,7 +193,7 @@ export function Main() {
             });
         });
 
-        listen(yt, 10000);
+        listen(yt, 30000);
 
         const client = new tmi.Client({
             options: { debug: true },
@@ -393,6 +393,7 @@ export function Main() {
                                     {chatLine.id === highlightedMessageId && <FaSearch size={`${engineerFontSize * 1.2}px`} color="gold" style={{ padding: "4px" }} />}
                                     {chatLine.platform === 'twitch' && <FaTwitch size={`${engineerFontSize}px`} style={{ marginRight: "10px" }} />}
                                     {chatLine.platform === 'youtube' && <FaYoutube size={`${engineerFontSize}px`} style={{ marginRight: "10px" }} />}
+                                    {chatLine.platform === 'tiktok' && <FaTiktok size={`${engineerFontSize}px`} style={{ marginRight: "10px" }} />}
                                     <span className="username"
                                         onClick={(e: any) => {
                                             console.log("User clicked: " + chatLine.user);

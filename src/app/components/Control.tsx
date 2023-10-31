@@ -15,7 +15,7 @@ let myState: State = {
     fontSize: 14,
     emojiSize: "1.0",
     useTagColor: true,
-    engineerFontSize: 14,
+    engineerFontSize: 14
 };
 
 function changeState(newState: State): void {
@@ -31,7 +31,7 @@ export default function Control() {
     const [emojiSize, setEmojiSize] = useState(myState.emojiSize);
     const [useTagColor, setUseTagColor] = useState(myState.useTagColor);
     const [stream, setStream] = useState(() => window.localStorage.getItem('stream') || 'EverythingNowShow');
-    const [youtubeChannelId, setyoutubeChannelId] = useState(() => window.localStorage.getItem('youtubeChannelId') || 'UC7Po7K12YTOE5jNYYE0kKaA');
+    const [youtubeChannelId, setyoutubeChannelId] = useState(() => window.localStorage.getItem('youtubeChannelId') || 'UC7Po7K12YTOE5jNYYE0kKaA-A');
     const [youtubeApiKey, setyoutubeApiKey] = useState(() => window.localStorage.getItem('youtubeApiKey') || 'apikey');
     const [message, setMessage] = useState('');
     const [isVisible, setIsVisible] = useState(false);

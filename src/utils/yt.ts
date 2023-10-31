@@ -62,7 +62,7 @@ const getChatId = async (yt: YouTubeEmitter) => {
 
 const getChat = async (yt: YouTubeEmitter) => {
     if (!yt.chatId) return yt.emit('error', 'Chat id is invalid.');
-    const url = `https://www.googleapis.com/youtube/v3/liveChat/messages?liveChatId=${yt.chatId}&part=id,snippet,authorDetails&maxResults=10&key=${yt.key}`;
+    const url = `https://www.googleapis.com/youtube/v3/liveChat/messages?liveChatId=${yt.chatId}&part=id,snippet,authorDetails&key=${yt.key}`;
     const data = await request(yt, url);
     if (data) {
         yt.emit('json', data);

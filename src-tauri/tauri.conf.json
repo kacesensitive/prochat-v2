@@ -9,7 +9,7 @@
   },
   "package": {
     "productName": "prochat-app-v2",
-    "version": "2.5.5"
+    "version": "2.5.6"
   },
   "tauri": {
     "macOSPrivateApi": true,

@@ -5,7 +5,7 @@ import { EmoteOptions, parse } from 'simple-tmi-emotes';
 import { AnimatePresence, motion } from "framer-motion";
 import Autolinker from 'autolinker';
 import { State } from "./Control";
-import { FaSearch, FaTwitch, FaYoutube } from 'react-icons/fa';
+import { FaSearch, FaTiktok, FaTwitch, FaYoutube } from 'react-icons/fa';
 import { PiPlantBold } from "react-icons/pi";
 import { createYouTube, listen } from "../../utils/yt";
 
@@ -70,7 +70,7 @@ export function Main() {
     const [emojiSize, setEmojiSize] = useState(initialEmojiSize);
     const [useTagColor, setUseTagColor] = useState(initialUseTagColor);
     const [stream, setStream] = useState(() => window.localStorage.getItem('stream') || 'EverythingNowShow');
-    const [youtubeChannelId, setyoutubeChannelId] = useState(() => window.localStorage.getItem('youtubeChannelId') || 'UC7Po7K12YTOE5jNYYE0kKaA');
+    const [youtubeChannelId, setyoutubeChannelId] = useState(() => window.localStorage.getItem('youtubeChannelId') || 'UC7Po7K12YTOE5jNYYE0kKaA-A');
     const [youtubeApiKey, setyoutubeApiKey] = useState(() => window.localStorage.getItem('youtubeApiKey') || 'apikey');
     const [controlMessage, setControlMessage] = useState<ControlMessage | null>(null);
     const [messageShown, setMessageShown] = useState(false);
@@ -85,6 +85,7 @@ export function Main() {
         });
         //@ts-ignore
         window.__TAURI__.event.listen('channel-changed', () => {
+            console.log('channel changed');
             setyoutubeChannelId(window.localStorage.getItem('youtubeChannelId') || '');
             window.location.reload();
         });
@@ -200,7 +201,7 @@ export function Main() {
 
         const yt = createYouTube({
             channelId: youtubeChannelId,
-            apiKey: youtubeApiKey
+            apiKey: youtubeApiKey,
         });
 
         yt.on('error', (error) => {
@@ -226,7 +227,7 @@ export function Main() {
             });
         });
 
-        listen(yt, 10000);
+        listen(yt, 30000);
 
         client.connect();
 
@@ -381,6 +382,7 @@ export function Main() {
                                     {chatLine.id === highlightedMessageId && <FaSearch size={`${fontSize * 1.2}px`} color="gold" style={{ padding: "4px" }} />}
                                     {chatLine.platform === 'twitch' && <FaTwitch size={`${fontSize}px`} style={{ marginRight: "10px" }} />}
                                     {chatLine.platform === 'youtube' && <FaYoutube size={`${fontSize}px`} style={{ marginRight: "10px" }} />}
+                                    {chatLine.platform === 'tiktok' && <FaTiktok size={`${fontSize}px`} style={{ marginRight: "10px" }} />}
                                     <span className="username" style={{
                                         fontWeight: "bold",
                                         color: chatLine.first ? "white" : chatLine.id === highlightedMessageId ? "#FFC100" : useTagColor ? isDark(chatLine.color) ? lightenColor(chatLine.color, 40) : chatLine.color : "white",
