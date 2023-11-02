@@ -350,6 +350,15 @@ export function Main() {
         scale: emojiSize,
     };
 
+    const safeParse = (message: string, emotes: any, options: any) => {
+        try {
+            return parse(message, emotes, options);
+        } catch (e) {
+            console.error('Error during parsing:', e);
+            return ''; // Return an empty string or some default message in case of error
+        }
+    };
+
     return (
         <><div style={{
             position: 'fixed',
@@ -430,7 +439,7 @@ export function Main() {
                                         fontSize: chatLine.id === highlightedMessageId ? `${fontSize * 1.6}px` : fontSize
                                     }}>{chatLine.user}: </span>
                                     <span className="message" dangerouslySetInnerHTML={{
-                                        __html: Autolinker.link(parse(chatLine.message, chatLine.emotes, options), {
+                                        __html: Autolinker.link(safeParse(chatLine.message, chatLine.emotes, options), {
                                             className: 'apple',
                                         }),
                                     }} style={{
