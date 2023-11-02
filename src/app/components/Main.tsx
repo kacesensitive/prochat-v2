@@ -214,7 +214,7 @@ export function Main() {
                         newChat.push({
                             user: chatItem.author.name,
                             message: chatItem.message[0].text,
-                            emotes: '',
+                            emotes: {},
                             color: '#' + Math.floor(Math.abs(Math.sin((chatItem.author.name || 'aaaa').split('').reduce((prev: any, curr: any) => ((prev << 5) - prev) + curr.charCodeAt(0), 0)) * 16777215)).toString(16),
                             first: false,
                             id: chatItem.id,
@@ -242,7 +242,7 @@ export function Main() {
                             newChat.push({
                                 user: msg.nickname,
                                 message: msg.comment,
-                                emotes: '',
+                                emotes: {},
                                 color: '#' + Math.floor(Math.abs(Math.sin((msg.nickname || 'aaaa').split('').reduce((prev: any, curr: any) => ((prev << 5) - prev) + curr.charCodeAt(0), 0)) * 16777215)).toString(16),
                                 first: false,
                                 id: msg.msgId,

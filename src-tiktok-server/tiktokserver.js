@@ -1,6 +1,6 @@
 const io = require("socket.io")(7011, {
     cors: {
-        origin: "http://localhost:3000",
+        origin: "https://tauri.localhost", // http:localhost:3000 for dev
         methods: ["GET", "POST"],
         credentials: true,
         allowedHeaders: ["my-custom-header"],
