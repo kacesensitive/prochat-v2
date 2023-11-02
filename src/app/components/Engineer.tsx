@@ -11,8 +11,7 @@ import { AiOutlineClear } from "react-icons/ai";
 import { PiPlantBold } from "react-icons/pi";
 import { writeText } from '@tauri-apps/api/clipboard';
 import { isDark, lightenColor } from "./Main";
-import { createYouTube, listen } from "@/utils/yt";
-import { TikTokIOConnection } from "@/utils/tiktok";
+import io from 'socket.io-client';
 
 interface Message {
     id: string | undefined;
@@ -50,8 +49,6 @@ export function Main() {
     const [emojiSize, setEmojiSize] = useState(initialEmojiSize);
     const [useTagColor, setUseTagColor] = useState(initialUseTagColor);
     const [stream, setStream] = useState(() => window.localStorage.getItem('stream') || 'EverythingNowShow');
-    const [youtubeChannelId, setyoutubeChannelId] = useState(() => window.localStorage.getItem('youtubeChannelId') || 'UC7Po7K12YTOE5jNYYE0kKaA-A');
-    const [youtubeApiKey, setyoutubeApiKey] = useState(() => window.localStorage.getItem('youtubeApiKey') || 'apikey');
     const [controlMessage, setControlMessage] = useState<ControlMessage | null>(null);
     const [messageShown, setMessageShown] = useState(false);
     const [highlightedMessageId, setHighlightedMessageId] = useState(null);
@@ -68,16 +65,6 @@ export function Main() {
         //@ts-ignore
         window.__TAURI__.event.listen('stream-changed', () => {
             setStream(window.localStorage.getItem('stream') || 'EverythingNowShow');
-            window.location.reload();
-        });
-        //@ts-ignore
-        window.__TAURI__.event.listen('channel-changed', () => {
-            setyoutubeChannelId(window.localStorage.getItem('youtubeChannelId') || '');
-            window.location.reload();
-        });
-        //@ts-ignore
-        window.__TAURI__.event.listen('api-changed', () => {
-            setyoutubeApiKey(window.localStorage.getItem('youtubeApiKey') || '');
             window.location.reload();
         });
     }, []);
@@ -151,7 +138,7 @@ export function Main() {
             { event: 'control-message', handler: setControlMessageHandler },
             { event: 'show-control-message', handler: setControlMessageHandler },
             { event: 'hide-control-message', handler: () => setMessageShown(false) },
-            { event: 'search-string-changed', handler: (string: any) => setSearchString(string.payload) },
+            { event: 'search-string-changed', handler: (string: any) => setSearchString(string) },
         ];
 
         listeners.forEach(({ event, handler }) => {
@@ -165,71 +152,85 @@ export function Main() {
 
     //@ts-ignore
     useEffect(() => {
+        // YT And TikTok
 
-        const connection = new TikTokIOConnection('http://localhost:7011');
-
-        connection.connect('everythingnowshow').then(() => {
-            console.log('Connected to tiktok');
-        }).catch((err) => {
-            console.error('Failed to connect:', err);
+        const socket = io("http://localhost:7011", {
+            withCredentials: true,
+            extraHeaders: {
+                "my-custom-header": "abcd"
+            }
         });
 
-        let msgID: any = null;
+        socket.on("connect", () => {
+            const commandData = {
+                uniqueId: 'couple_cruise_',
+                options: {}
+            };
 
-        connection.on('chat', (msg) => {
-            setChat((prevChat) => {
-                let newChat = [...prevChat];
-                if (msgID === msg.msgId) {
-                    return prevChat;
-                } else {
-                    msgID = msg.msgId;
+            socket.emit("setUniqueId", commandData);
+        });
+
+        socket.on("youtubeChat", (chatItem) => {
+            console.log("Received YouTube Chat");
+            if (chatItem) {
+                console.log("Received YouTube Chat:", JSON.stringify(chatItem, null, 3));
+                setChat((prevChat) => {
+                    const lastChat = prevChat[prevChat.length - 1];
+                    let newChat = [...prevChat];
                     //@ts-ignore
-                    newChat.push({
-                        user: msg.nickname,
-                        message: msg.comment,
-                        // generate a random color using the name as the seed
-                        color: '#' + Math.floor(Math.abs(Math.sin(msg.uniqueId.split('').reduce((prev: any, curr: any) => ((prev << 5) - prev) + curr.charCodeAt(0), 0)) * 16777215)).toString(16),
-                        first: false,
-                        id: msg.msgId,
-                        returningChatter: false,
-                        platform: 'tiktok'
-                    });
-                    // Limit chat history to the last 60 messages
+                    if (lastChat && lastChat.id === chatItem.id && lastChat.message === chatItem.message) {
+                        return prevChat;
+                    } else {
+                        console.log('new chat', chatItem);
+                        //@ts-ignore
+                        newChat.push({
+                            user: chatItem.author.name,
+                            message: chatItem.message[0].text,
+                            emotes: '',
+                            color: '#' + Math.floor(Math.abs(Math.sin(chatItem.author.name.split('').reduce((prev: any, curr: any) => ((prev << 5) - prev) + curr.charCodeAt(0), 0)) * 16777215)).toString(16),
+                            first: false,
+                            id: chatItem.id,
+                            returningChatter: false,
+                            platform: 'youtube',
+                        });
+                    }
                     return newChat.slice(Math.max(newChat.length - 60, 0));
-                }
-            });
-        });
-
-        const yt = createYouTube({
-            channelId: youtubeChannelId,
-            apiKey: youtubeApiKey
-        });
-
-        yt.on('error', (error) => {
-            console.error(`Handled Error: ${error}`);
-        });
-
-        yt.on('message', (data: any) => {
-            setChat((prevChat) => {
-                let newChat = [...prevChat];
-                //@ts-ignore
-                newChat.push({
-                    user: data.authorDetails.displayName,
-                    message: data.snippet.displayMessage,
-                    // generate a random color using the name as the seed
-                    color: '#' + Math.floor(Math.abs(Math.sin(data.authorDetails.displayName.split('').reduce((prev: any, curr: any) => ((prev << 5) - prev) + curr.charCodeAt(0), 0)) * 16777215)).toString(16),
-                    first: false,
-                    id: data.id,
-                    returningChatter: false,
-                    platform: 'youtube'
                 });
-                // Limit chat history to the last 60 messages
-                return newChat.slice(Math.max(newChat.length - 60, 0));
-            });
+            }
         });
 
-        listen(yt, 30000);
+        socket.on("tiktokChat", (msg) => {
+            if (msg) {
+                console.log("Received TikTok Chat:", JSON.stringify(msg, null, 3));
+                setChat((prevChat) => {
+                    const lastChat = prevChat[prevChat.length - 1];
+                    let newChat = [...prevChat];
+                    //@ts-ignore
+                    if (lastChat && lastChat.msgId === msg.msgId && lastChat.comment === msg.comment) {
+                        return prevChat;
+                    } else {
+                        if ('nickname' in msg && 'comment' in msg) {
+                            //@ts-ignore
+                            newChat.push({
+                                user: msg.nickname,
+                                message: msg.comment,
+                                emotes: '',
+                                color: '#' + Math.floor(Math.abs(Math.sin(msg.nickname.split('').reduce((prev: any, curr: any) => ((prev << 5) - prev) + curr.charCodeAt(0), 0)) * 16777215)).toString(16),
+                                first: false,
+                                id: msg.msgId,
+                                returningChatter: false,
+                                platform: 'tiktok',
+                            });
+                        }
+                    }
+                    return newChat.slice(Math.max(newChat.length - 60, 0));
+                });
+            } else {
+                console.log("Received TikTok Chat, but message is missing.", msg);
+            }
+        });
 
+        // Twitch
         const client = new tmi.Client({
             options: { debug: true },
             connection: {
@@ -318,6 +319,34 @@ export function Main() {
         scale: emojiSize,
     };
 
+    interface ChatLine {
+        message: string;
+        user: string;
+    }
+
+    const searchInChat = (chat: ChatLine[], searchString: string): ChatLine[] => {
+        if (!searchString) {
+            // Return the original array if the search string is empty
+            return chat;
+        }
+
+        const lowerCaseSearchString = searchString.toLowerCase();
+
+        return chat.filter(chatLine => {
+            const message = chatLine.message;
+            const user = chatLine.user;
+
+            if (typeof message === 'string' && typeof user === 'string') {
+                return message.toLowerCase().includes(lowerCaseSearchString) ||
+                    user.toLowerCase().includes(lowerCaseSearchString);
+            }
+
+            return false;
+        });
+    };
+
+    const lowerCaseSearchString = searchString.toLowerCase();
+
     return (
         <><div style={{
             position: 'fixed',
@@ -350,7 +379,7 @@ export function Main() {
                         >
                             {
                                 //@ts-ignore
-                                controlMessage.message.payload
+                                controlMessage.message
                             }
                         </motion.div>
                     )}
@@ -375,11 +404,10 @@ export function Main() {
                     msOverflowStyle: 'none',
                 }}>
                     <AnimatePresence>
-                        {chat.filter(chatLine =>
-                            //@ts-ignore
-                            chatLine.message.toLowerCase().includes(searchString.toLowerCase()) ||
-                            //@ts-ignore
-                            chatLine.user.toLowerCase().includes(searchString.toLowerCase()))
+                        {chat.filter((chatLine: any) =>
+                            chatLine.message.toLowerCase().includes(lowerCaseSearchString) ||
+                            chatLine.user.toLowerCase().includes(lowerCaseSearchString)
+                        )
                             .map((chatLine: any, index) => (
                                 <motion.div
                                     key={index}

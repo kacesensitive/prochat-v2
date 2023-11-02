@@ -8,6 +8,11 @@ setInterval(() => {
 }, 60 * 1000)
 
 function clientBlocked(io, currentSocket) {
+    if (!io) {
+        console.error('LIMITER: IO object is not defined.');
+        return false;
+    }
+
     let ipCounts = getOverallIpConnectionCounts(io);
     let currentIp = getSocketIp(currentSocket);
 
@@ -35,6 +40,11 @@ function clientBlocked(io, currentSocket) {
 }
 
 function getOverallIpConnectionCounts(io) {
+    if (!io || !io.of) {
+        console.error('LIMITER: IO object or IO.of is not defined.');
+        return {};
+    }
+
     let ipCounts = {};
 
     io.of('/').sockets.forEach(socket => {

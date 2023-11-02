@@ -34,8 +34,7 @@ class TikTokConnectionWrapper extends EventEmitter {
         });
 
         this.connection.on('error', (err) => {
-            this.log(`Error event triggered: ${err.info}, ${err.exception}`);
-            console.error(err);
+            console.error(JSON.stringify(err, null, 3));
         })
     }
 
@@ -62,6 +61,8 @@ class TikTokConnectionWrapper extends EventEmitter {
 
         }).catch((err) => {
             this.log(`${isReconnect ? 'Reconnect' : 'Connection'} failed, ${err}`);
+
+            console.error('Tiktok connection error \n\n Please close and try again once ProChat is running!')
 
             if (isReconnect) {
                 // Schedule the next reconnect attempt
