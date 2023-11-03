@@ -77,6 +77,7 @@ export default function Control() {
     }
 
     const handleSearchStringChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        console.log(event.target.value, 'search string');
         setSearchString(event.target.value);
         //@ts-ignore
         window.__TAURI__.event.emit('search-string-changed', event.target.value);

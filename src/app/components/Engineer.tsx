@@ -127,9 +127,9 @@ export function Main() {
     useEffect(() => {
         let isSubscribed = true;
 
-        const setControlMessageHandler = (message: string) => {
+        const setControlMessageHandler = (message: any) => {
             if (isSubscribed) {
-                setControlMessage({ message, shown: true });
+                setControlMessage({ message: message.payload, shown: true });
                 setMessageShown(true);
             }
         };
@@ -138,7 +138,12 @@ export function Main() {
             { event: 'control-message', handler: setControlMessageHandler },
             { event: 'show-control-message', handler: setControlMessageHandler },
             { event: 'hide-control-message', handler: () => setMessageShown(false) },
-            { event: 'search-string-changed', handler: (string: any) => setSearchString(string) },
+            {
+                event: 'search-string-changed', handler: (string: any) => {
+                    console.log('search string changed', string);
+                    setSearchString(string.payload)
+                },
+            }
         ];
 
         listeners.forEach(({ event, handler }) => {
@@ -413,9 +418,15 @@ export function Main() {
                     msOverflowStyle: 'none',
                 }}>
                     <AnimatePresence>
-                        {chat.filter((chatLine: any) =>
-                            (chatLine.message || '').toLowerCase().includes(lowerCaseSearchString) ||
-                            (chatLine.user || '').toLowerCase().includes(lowerCaseSearchString)
+                        {chat.filter((chatLine: any) => {
+                            if ((chatLine.message || '').toLowerCase().includes(lowerCaseSearchString) ||
+                                (chatLine.user || '').toLowerCase().includes(lowerCaseSearchString)) {
+                                console.log('SEARCH \n\n\n\n', searchString)
+                                return true;
+                            } else {
+                                return false;
+                            }
+                        }
                         )
                             .map((chatLine: any, index) => (
                                 <motion.div

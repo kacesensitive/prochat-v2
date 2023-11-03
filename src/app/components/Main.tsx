@@ -123,10 +123,10 @@ export function Main() {
         };
         //@ts-ignore
         window.__TAURI__.event.listen('control-message', controlMessageHandler);
-        const showControlMessageHandler = (message: string) => {
+        const showControlMessageHandler = (message: any) => {
             if (isSubscribed) {
                 setControlMessage({
-                    message,
+                    message: message.payload,
                     shown: true,
                 });
                 setMessageShown(true);
