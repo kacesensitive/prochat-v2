@@ -1,6 +1,8 @@
 "use client";
 import { useState, useEffect } from 'react';
-import styles from './control.module.css'
+import styles from './control.module.css';
+import { os } from '@tauri-apps/api';
+import { Command } from '@tauri-apps/api/shell'
 import { FaEnvelope, FaCog, FaCheckDouble } from 'react-icons/fa';
 import { AiOutlineClose } from 'react-icons/ai';
 
@@ -35,6 +37,27 @@ export default function Control() {
     const [isVisible, setIsVisible] = useState(false);
     const [searchString, setSearchString] = useState('');
     const [isSettingsVisible, setIsSettingsVisible] = useState(false);
+
+    const startChatServer = async () => {
+        const platform = await os.platform(); // 'darwin', 'linux', or 'win32'
+        let binaryName = '';
+
+        if (platform === 'win32') {
+            binaryName = 'chatserver-win.exe';
+        } else if (platform === 'darwin') {
+            binaryName = 'chatserver-macos-aarch64-apple-darwin';
+        } else if (platform === 'linux') {
+            binaryName = 'chatserver-linux';
+        }
+
+        const command = Command.sidecar(`bin/${binaryName}`);
+        try {
+            const output = await command.execute();
+            console.log('Chat server started:', output);
+        } catch (error) {
+            console.error('Failed to start chat server:', error);
+        }
+    };
 
     const toggleSettingsVisibility = () => {
         setIsSettingsVisible(!isSettingsVisible);
@@ -202,6 +225,9 @@ export default function Control() {
                             />
                             <FaCheckDouble size={20} style={{ color: '#00FFD8', padding: '2px', cursor: 'pointer' }} onClick={() => handleStreamChange(stream)} />
                         </div>
+                        <button onClick={startChatServer} style={{ cursor: 'pointer' }}>
+                            Start Chat Server
+                        </button>
                     </>
                 )}
             </div>

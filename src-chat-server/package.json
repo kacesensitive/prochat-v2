@@ -1,10 +1,10 @@
 {
-    "name": "tiktok-server",
+    "name": "chat-server",
     "version": "1.0.0",
-    "main": "tiktokserver.js",
-    "bin": "tiktokserver.js",
+    "main": "chat.js",
+    "bin": "chat.js",
     "scripts": {
-        "build": "pkg . -o build/chatserver"
+        "build": "pkg . -o ../src-tauri/binaries/chatserver"
     },
     "pkg": {
         "targets": [
@@ -22,7 +22,7 @@
         "socket.io": "^4.7.2",
         "tiktok-live-connector": "^1.0.5",
         "yargs": "^17.7.2",
-        "youtube-chat": "^2.2.0"
+        "youtube-chat-kacesensitive": "^1.0.0"
     },
     "output": "build"
 }

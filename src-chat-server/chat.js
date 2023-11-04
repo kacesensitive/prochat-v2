@@ -1,6 +1,6 @@
 const io = require("socket.io")(7011, {
     cors: {
-        origin: "https://tauri.localhost", // http://localhost:3000 for dev
+        origin: "http://localhost:3000", // http://localhost:3000 for dev
         methods: ["GET", "POST"],
         credentials: true,
         allowedHeaders: ["my-custom-header"],
@@ -8,11 +8,11 @@ const io = require("socket.io")(7011, {
     }
 });
 const { TikTokConnectionWrapper } = require('./connectionWrapper');
-const { LiveChat } = require('youtube-chat');
+const { LiveChat } = require('youtube-chat-kacesensitive');
 const argv = require('yargs/yargs')(process.argv.slice(2)).argv;
 
-let youtubeChannelId = argv.yt || "UC7Po7K12YTOE5jNYYE0kKaA";
-let tiktokProfileName = argv.tiktok || "everythingnowshow";
+let youtubeChannelId = argv.yt || "UCoSmpfgeYWZTGuP3-JkK3BQ"; //UC7Po7K12YTOE5jNYYE0kKaA
+let tiktokProfileName = argv.tiktok || "hobingetik_real"; //everythingnowshow
 
 io.on("connection", (socket) => {
     let tiktokConnectionWrapper;
