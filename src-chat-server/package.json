@@ -4,7 +4,7 @@
     "main": "chat.js",
     "bin": "chat.js",
     "scripts": {
-        "build": "pkg . -o ../src-tauri/binaries/chatserver"
+        "build": "rm -rf ../src-tauri/bin/* && pkg . -o ../src-tauri/bin/chatserver"
     },
     "pkg": {
         "targets": [

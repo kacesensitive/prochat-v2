@@ -37,6 +37,7 @@ export default function Control() {
     const [isVisible, setIsVisible] = useState(false);
     const [searchString, setSearchString] = useState('');
     const [isSettingsVisible, setIsSettingsVisible] = useState(false);
+    const [isServerRunning, setIsServerRunning] = useState(false);
 
     const startChatServer = async () => {
         const platform = await os.platform(); // 'darwin', 'linux', or 'win32'
@@ -45,7 +46,7 @@ export default function Control() {
         if (platform === 'win32') {
             binaryName = 'chatserver-win.exe';
         } else if (platform === 'darwin') {
-            binaryName = 'chatserver-macos-aarch64-apple-darwin';
+            binaryName = 'chatserver-macos';
         } else if (platform === 'linux') {
             binaryName = 'chatserver-linux';
         }
@@ -53,8 +54,10 @@ export default function Control() {
         const command = Command.sidecar(`bin/${binaryName}`);
         try {
             const output = await command.execute();
+            setIsServerRunning(true);
             console.log('Chat server started:', output);
         } catch (error) {
+            setIsServerRunning(false);
             console.error('Failed to start chat server:', error);
         }
     };

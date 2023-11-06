@@ -16,7 +16,21 @@
     "allowlist": {
       "shell": {
         "open": true,
-        "sidecar": true
+        "sidecar": true,
+        "scope": [
+          {
+            "name": "bin/chatserver-macos",
+            "sidecar": true
+          },
+          {
+            "name": "bin/chatserver-linux",
+            "sidecar": true
+          },
+          {
+            "name": "bin/chatserver-win.exe",
+            "sidecar": true
+          }
+        ]
       },
       "clipboard": {
         "all": true,
@@ -39,7 +53,11 @@
       "deb": {
         "depends": []
       },
-      "externalBin": [],
+      "externalBin": [
+        "bin/chatserver-macos",
+        "bin/chatserver-linux",
+        "bin/chatserver-win.exe"
+      ],
       "icon": [
         "icons/32x32.png",
         "icons/128x128.png",

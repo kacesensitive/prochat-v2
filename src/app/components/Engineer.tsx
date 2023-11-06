@@ -168,7 +168,7 @@ export function Main() {
 
         socket.on("connect", () => {
             const commandData = {
-                uniqueId: 'couple_cruise_',
+                uniqueId: '',
                 options: {}
             };
 
@@ -183,7 +183,7 @@ export function Main() {
                     const lastChat = prevChat[prevChat.length - 1];
                     let newChat = [...prevChat];
                     //@ts-ignore
-                    if (lastChat && lastChat.id === chatItem.id && lastChat.message === chatItem.message) {
+                    if (lastChat && lastChat.id === chatItem.id && lastChat.message === chatItem.message && Array.isArray(chatItem.message) && chatItem.message[0].text) {
                         return prevChat;
                     } else {
                         console.log('new chat', chatItem);
@@ -192,7 +192,7 @@ export function Main() {
                             user: chatItem.author.name,
                             message: chatItem.message[0].text,
                             emotes: {},
-                            color: '#' + Math.floor(Math.abs(Math.sin(chatItem.author.name.split('').reduce((prev: any, curr: any) => ((prev << 5) - prev) + curr.charCodeAt(0), 0)) * 16777215)).toString(16),
+                            color: '#FFEEEE',
                             first: false,
                             id: chatItem.id,
                             returningChatter: false,
@@ -220,7 +220,7 @@ export function Main() {
                                 user: msg.nickname,
                                 message: msg.comment,
                                 emotes: {},
-                                color: '#' + Math.floor(Math.abs(Math.sin(msg.nickname.split('').reduce((prev: any, curr: any) => ((prev << 5) - prev) + curr.charCodeAt(0), 0)) * 16777215)).toString(16),
+                                color: '#FFEEEE',
                                 first: false,
                                 id: msg.msgId,
                                 returningChatter: false,
@@ -434,12 +434,16 @@ export function Main() {
                                     id={chatLine.id}
                                     className="chatLine"
                                     style={{
-                                        border: chatLine.first ? "2px solid white" : chatLine.id === hoveredMessageId ? '2px dotted white' : chatLine.gift ? "2px dotted gold" : "",
+                                        border: chatLine.first ? "2px solid white" :
+                                            chatLine.gift ? "2px dotted gold" :
+                                                chatLine.id === hoveredMessageId ? '2px dotted white' :
+                                                    (chatLine.platform === 'youtube' || chatLine.platform === 'tiktok') ? "2px solid white" : chatLine.gift ? "2px dotted gold" : "",
                                         borderRadius: "10px",
-                                        backgroundColor: chatLine.first ? "green" : chatLine.id === highlightedMessageId ? "gray" : "",
+                                        backgroundColor: chatLine.first ? "green" : chatLine.id === highlightedMessageId ? "gray" : chatLine.platform === 'youtube' ? '#C10000' : chatLine.platform === 'tiktok' ? '#00A19C' : "",
                                         fontWeight: chatLine.first ? "bold" : "normal",
                                         fontSize: chatLine.first ? `${engineerFontSize * 1.2}px` : `${engineerFontSize}px`,
                                         cursor: "pointer",
+                                        marginTop: "5px",
                                     }}
                                     initial={{ opacity: 0, y: -50 }}
                                     animate={{ opacity: 1, y: 0 }}
@@ -475,8 +479,8 @@ export function Main() {
                                     {chatLine.first && <PiPlantBold size={`${engineerFontSize * 1.2}px`} color="white" style={{ marginRight: "20px", paddingTop: "5px" }} />}
                                     {chatLine.id === highlightedMessageId && <FaSearch size={`${engineerFontSize * 1.2}px`} color="gold" style={{ padding: "4px" }} />}
                                     {chatLine.platform === 'twitch' && <FaTwitch size={`${engineerFontSize}px`} style={{ marginRight: "10px" }} />}
-                                    {chatLine.platform === 'youtube' && <FaYoutube size={`${engineerFontSize}px`} style={{ marginRight: "10px" }} />}
-                                    {chatLine.platform === 'tiktok' && <FaTiktok size={`${engineerFontSize}px`} style={{ marginRight: "10px" }} />}
+                                    {chatLine.platform === 'youtube' && <FaYoutube size={`${engineerFontSize}px`} style={{ marginRight: "10px", marginLeft: "5px" }} />}
+                                    {chatLine.platform === 'tiktok' && <FaTiktok size={`${engineerFontSize}px`} style={{ marginRight: "10px", marginLeft: "5px" }} />}
                                     <span className="username"
                                         onClick={(e: any) => {
                                             console.log("User clicked: " + chatLine.user);
