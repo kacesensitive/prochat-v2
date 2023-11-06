@@ -9,7 +9,7 @@
   },
   "package": {
     "productName": "prochat-app-v2",
-    "version": "2.8.1"
+    "version": "2.8.2"
   },
   "tauri": {
     "macOSPrivateApi": true,
@@ -27,7 +27,7 @@
             "sidecar": true
           },
           {
-            "name": "bin/chatserver-win.exe",
+            "name": "bin/chatserver-win",
             "sidecar": true
           }
         ]
