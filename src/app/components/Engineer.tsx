@@ -448,8 +448,14 @@ export function Main() {
                                     initial={{ opacity: 0, y: -50 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     exit={{ opacity: 0, y: -50 }}
-                                    onClick={() => {
-                                        if (highlightedMessageId === chatLine.id) {
+                                    onClick={(e) => {
+                                        if (e.shiftKey) {
+                                            if (chatLine.message && chatLine.message.length > 0 && chatLine.user && chatLine.user.length > 0) {
+                                                //@ts-ignore
+                                                window.__TAURI__.event.emit("featured-message", chatLine);
+                                            }
+                                        }
+                                        else if (highlightedMessageId === chatLine.id) {
                                             onMessageClick('');
                                             handleMessageClicked('');
                                         } else {
