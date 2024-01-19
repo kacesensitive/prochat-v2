@@ -70,8 +70,8 @@ const Main = () => {
     };
 
     return (
-        <div style={mainContainerStyle}>
-            <div style={{
+        <div data-tauri-drag-region style={mainContainerStyle}>
+            <div data-tauri-drag-region style={{
                 fontSize: '1.5rem',
                 fontWeight: 'bold',
                 marginBottom: '1rem',
