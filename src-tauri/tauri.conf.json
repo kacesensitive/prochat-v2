@@ -9,7 +9,7 @@
   },
   "package": {
     "productName": "prochat-app-v2",
-    "version": "2.8.2"
+    "version": "2.9.0"
   },
   "tauri": {
     "macOSPrivateApi": true,
@@ -109,6 +109,17 @@
         "fullscreen": false,
         "transparent": false,
         "url": "/engineer"
+      },
+      {
+        "title": "ProChat Featured",
+        "label": "prochat-app-v2-featured",
+        "width": 800,
+        "height": 800,
+        "resizable": true,
+        "fullscreen": false,
+        "transparent": true,
+        "decorations": false,
+        "url": "/featured"
       }
     ]
   }

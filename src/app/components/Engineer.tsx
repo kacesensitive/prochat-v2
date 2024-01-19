@@ -475,6 +475,13 @@ export function Main() {
                                             console.error('Could not copy text: ', err);
                                         }
                                     }}
+                                    // on control + click tauri emit featured message
+                                    onDoubleClick={() => {
+                                        if (chatLine.message && chatLine.message.length > 0 && chatLine.user && chatLine.user.length > 0) {
+                                            //@ts-ignore
+                                            window.__TAURI__.event.emit("featured-message", chatLine);
+                                        }
+                                    }}
                                 >
                                     {chatLine.first && <PiPlantBold size={`${engineerFontSize * 1.2}px`} color="white" style={{ marginRight: "20px", paddingTop: "5px" }} />}
                                     {chatLine.id === highlightedMessageId && <FaSearch size={`${engineerFontSize * 1.2}px`} color="gold" style={{ padding: "4px" }} />}
@@ -535,6 +542,8 @@ export function Main() {
                     onUserClearClick();
                     onMessageClick('');
                     handleMessageClicked('');
+                    //@ts-ignore
+                    window.__TAURI__.event.emit("featured-message", {});
                 }} />
             </div>
             <div style={{
