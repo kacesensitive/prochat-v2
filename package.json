@@ -1,6 +1,6 @@
 {
   "name": "prochat-app-v2",
-  "version": "2.9.3",
+  "version": "2.9.5",
   "private": true,
   "scripts": {
     "dev": "node rename-binaries.js && next dev",
