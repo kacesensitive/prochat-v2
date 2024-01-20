@@ -111,10 +111,10 @@
         "url": "/engineer"
       },
       {
-        "title": "ProChat Featured",
-        "label": "prochat-app-v2-featured",
-        "width": 800,
-        "height": 800,
+        "title": "ProChat Feature",
+        "label": "prochat-app-v2-feature",
+        "width": 1,
+        "height": 1,
         "resizable": true,
         "fullscreen": false,
         "transparent": true,
