@@ -75,9 +75,7 @@ const Main = () => {
                 fontSize: '1.5rem',
                 fontWeight: 'bold',
                 marginBottom: '1rem',
-                backgroundColor: 'black',
                 padding: '5px',
-                borderRadius: '8px',
             }}>Now Showing</div>
             <div style={containerStyle}>
                 <motion.div
@@ -86,7 +84,12 @@ const Main = () => {
                     transition={{ duration: 0.5 }}
                     style={{ marginTop: '1rem', minHeight: '1.5rem' }}
                 >
-                    {showing && showing.message && <div style={{ marginBottom: '1rem' }}>
+                    {showing && showing.message && <div style={{
+                        marginBottom: '1rem',
+                        maxWidth: '600px',
+                        minWidth: '600px',
+                        position: 'relative',
+                    }}>
                         <motion.div
                             key={showing.user || '' + showing.message}
                             initial="hidden"
@@ -94,35 +97,60 @@ const Main = () => {
                             transition={{ duration: 0.5 }}
                             style={{
                                 display: "flex",
+                                flexDirection: 'column',
                                 alignItems: "center",
                                 justifyContent: "center",
                                 padding: "10px",
-                                borderRadius: "10px",
                                 backgroundColor: "black",
                                 fontSize: emojiSize,
+                                maxWidth: '600px',
+                                minWidth: '600px',
                             }}
                         >
-                            {showing.first && <PiPlantBold size={emojiSize} color="white" style={{ marginRight: "20px", paddingTop: "5px" }} />}
-                            {showing.platform === 'twitch' && <FaTwitch size={emojiSize} style={{ marginRight: "10px" }} />}
-                            {showing.platform === 'youtube' && <FaYoutube size={emojiSize} style={{ marginRight: "10px", marginLeft: "5px" }} />}
-                            {showing.platform === 'tiktok' && <FaTiktok size={emojiSize} style={{ marginRight: "10px", marginLeft: "5px" }} />}
-                            {showing.user && <span className="username" style={{
-                                fontWeight: "bold",
-                                color: showing.color && isDark(showing.color) ? lightenColor(showing.color, 40) : showing.color || "white",
-                                fontSize: emojiSize,
-                                marginRight: "10px"
-                            }}>{showing.user}: </span>}
+                            {showing.user && <div style={{
+                                alignSelf: 'flex-start',
+                                width: '100%',
+                                display: 'flex',
+                                justifyContent: 'flex-start',
+                                paddingRight: '10px',
+                            }}>
+                                <span className="username" style={{
+                                    fontWeight: "bold",
+                                    color: showing.color && isDark(showing.color) ? lightenColor(showing.color, 40) : showing.color || "white",
+                                    fontSize: emojiSize,
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                    whiteSpace: 'nowrap',
+                                }}>{showing.user + ':'}</span>
+                            </div>}
                             {showing.message && <span className="message" dangerouslySetInnerHTML={{
                                 __html: Autolinker.link(safeParse(showing.message, showing.emotes, options), {
                                     className: 'apple',
                                 }),
-                            }} style={{ fontSize: emojiSize }} />}
+                            }} style={{
+                                fontSize: emojiSize,
+                                maxWidth: '580px',
+                                margin: '0 auto',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                display: '-webkit-box',
+                                WebkitLineClamp: 3,
+                                WebkitBoxOrient: 'vertical',
+                                textAlign: 'left'
+                            }} />}
+                            <div style={{
+                                position: 'absolute',
+                                bottom: '0',
+                                left: '0',
+                                width: '100%',
+                                height: '4px',
+                                backgroundColor: showing.color || "white",
+                            }}></div>
                         </motion.div>
                     </div>}
                 </motion.div>
             </div>
             <button onClick={toggleShowing} style={buttonStyle}>show/hide</button>
-
             <button onClick={clearQueue} style={buttonStyle}>clear all</button>
             <div style={queueContainerStyle}>
                 On Deck
@@ -190,7 +218,6 @@ const containerStyle: React.CSSProperties = {
     marginBottom: '1rem',
     padding: '1rem',
     border: '1px solid white',
-    borderRadius: '8px',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
@@ -203,7 +230,6 @@ const queueContainerStyle: React.CSSProperties = {
     marginBottom: '1rem',
     padding: '5px',
     border: '1px solid white',
-    borderRadius: '8px',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
@@ -217,14 +243,12 @@ const buttonStyle: React.CSSProperties = {
     padding: '0.5rem 1rem',
     margin: '0.5rem',
     border: 'none',
-    borderRadius: '8px',
     cursor: 'pointer',
     backgroundColor: 'gray',
     color: 'white',
 };
 
 const queueItemStyle: React.CSSProperties = {
-    borderRadius: '8px',
     cursor: 'pointer',
     userSelect: 'none',
 };

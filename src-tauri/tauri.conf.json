@@ -9,7 +9,7 @@
   },
   "package": {
     "productName": "prochat-app-v2",
-    "version": "2.9.5"
+    "version": "2.9.6"
   },
   "tauri": {
     "macOSPrivateApi": true,
@@ -111,13 +111,16 @@
         "url": "/engineer"
       },
       {
-        "title": "ProChat Feature",
-        "label": "prochat-app-v2-feature",
-        "width": 1,
-        "height": 1,
+        "title": "ProChat Features",
+        "label": "prochat-app-v2-features",
+        "width": 865,
+        "height": 630,
+        "minHeight": 630,
+        "minWidth": 865,
         "resizable": true,
         "fullscreen": false,
-        "transparent": true,
+        "transparent": false,
+        "alwaysOnTop": true,
         "url": "/featured"
       }
     ]
