@@ -6,12 +6,13 @@ import { AnimatePresence, motion } from "framer-motion";
 import Autolinker from 'autolinker';
 import Control, { State } from "./Control";
 import { FaSearch, FaTiktok, FaTwitch, FaYoutube } from 'react-icons/fa';
-import { IoIosArrowDown } from "react-icons/io";
+import { IoIosArrowDown, IoMdCloseCircleOutline } from "react-icons/io";
 import { AiOutlineClear } from "react-icons/ai";
 import { PiPlantBold } from "react-icons/pi";
 import { writeText } from '@tauri-apps/api/clipboard';
 import { isDark, lightenColor } from "./Main";
 import io from 'socket.io-client';
+import toast, { Toaster } from "react-hot-toast";
 
 interface Message {
     id: string | undefined;
@@ -54,6 +55,17 @@ export function Main() {
     const [highlightedMessageId, setHighlightedMessageId] = useState(null);
     const [userFilter, setUserFilter] = useState("");
     const [searchString, setSearchString] = useState("");
+    const [isAutoScrolling, setIsAutoScrolling] = useState(true);
+    const [isSavingToTempChat, setIsSavingToTempChat] = useState(false);
+    const [tempChat, setTempChat] = useState([]);
+
+    const chatContainerRef = useRef<HTMLDivElement>(null);
+
+    const scrollToBottom = () => {
+        if (chatContainerRef.current && isAutoScrolling) {
+            chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+        }
+    };
 
     const [hoveredMessageId, setHoveredMessageId] = useState(null);
 
@@ -290,29 +302,54 @@ export function Main() {
             }
 
             msg.message = message;
-            //@ts-ignore
-            setChat((prevChat) => {
-                const lastChat = prevChat[prevChat.length - 1];
-                let newChat = [...prevChat];
-                //@ts-ignore
-                if (lastChat && lastChat.user === tags["display-name"] && lastChat.message === message) {
-                    return prevChat;
-                } else {
+            if (isSavingToTempChat) {
+                setTempChat((prevChat) => {
+                    const lastChat = prevChat[prevChat.length - 1];
+                    let newChat = [...prevChat];
                     //@ts-ignore
-                    newChat.push({
-                        user: tags["display-name"],
-                        message,
-                        emotes: tags?.emotes,
-                        color: tags?.color,
-                        first: first,
-                        id: tags?.id,
-                        returningChatter: tags?.['returning-chatter'],
-                        platform: 'twitch',
-                    });
-                }
+                    if (lastChat && lastChat.user === tags["display-name"] && lastChat.message === message) {
+                        return prevChat;
+                    } else {
+                        //@ts-ignore
+                        newChat.push({
+                            user: tags["display-name"],
+                            message,
+                            emotes: tags?.emotes,
+                            color: tags?.color,
+                            first: first,
+                            id: tags?.id,
+                            returningChatter: tags?.['returning-chatter'],
+                            platform: 'twitch',
+                        });
+                    }
 
-                return newChat.slice(Math.max(newChat.length - 60, 0));
-            });
+                    return newChat.slice(Math.max(newChat.length - 600, 0));
+                });
+            } else {
+                //@ts-ignore
+                setChat((prevChat) => {
+                    const lastChat = prevChat[prevChat.length - 1];
+                    let newChat = [...prevChat];
+                    //@ts-ignore
+                    if (lastChat && lastChat.user === tags["display-name"] && lastChat.message === message) {
+                        return prevChat;
+                    } else {
+                        //@ts-ignore
+                        newChat.push({
+                            user: tags["display-name"],
+                            message,
+                            emotes: tags?.emotes,
+                            color: tags?.color,
+                            first: first,
+                            id: tags?.id,
+                            returningChatter: tags?.['returning-chatter'],
+                            platform: 'twitch',
+                        });
+                    }
+
+                    return newChat.slice(Math.max(newChat.length - 60, 0));
+                });
+            }
         });
 
         return () => client.disconnect();
@@ -329,27 +366,6 @@ export function Main() {
         user: string;
     }
 
-    const searchInChat = (chat: ChatLine[], searchString: string): ChatLine[] => {
-        if (!searchString) {
-            // Return the original array if the search string is empty
-            return chat;
-        }
-
-        const lowerCaseSearchString = searchString.toLowerCase();
-
-        return chat.filter(chatLine => {
-            const message = chatLine.message;
-            const user = chatLine.user;
-
-            if (typeof message === 'string' && typeof user === 'string') {
-                return message.toLowerCase().includes(lowerCaseSearchString) ||
-                    user.toLowerCase().includes(lowerCaseSearchString);
-            }
-
-            return false;
-        });
-    };
-
     const lowerCaseSearchString = searchString.toLowerCase();
 
     const safeParse = (message: string, emotes: any, options: any) => {
@@ -361,6 +377,35 @@ export function Main() {
         }
     };
 
+    useEffect(() => {
+        scrollToBottom();
+    }, [chat]);
+
+    // every 5 seconds, give a toast message
+    useEffect(() => {
+        const interval = setInterval(() => {
+            toast((t) => (
+                <span onClick={() => toast.dismiss(t.id)}>
+                  <b>Tighwin says - "GET BTS FOOTAGE"</b>
+                </span>
+              ), {
+                duration: 1200000,
+                position: 'top-center',
+                style: {
+                  background: '#FFF',
+                  color: '#333',
+                  minWidth: '450px',
+                  borderRadius: '8px',
+                  border: '2px solid blue',
+                },
+                className: '',
+                icon: '🎥',
+                
+              });
+        }, 1200000);
+        return () => clearInterval(interval);
+    }, []);
+
     return (
         <><div style={{
             position: 'fixed',
@@ -369,6 +414,7 @@ export function Main() {
             transform: 'translate(-50%, -50%)',
             zIndex: 9999,
         }}>
+            <Toaster/>
             <AnimatePresence>
                 <div style={
                     {
@@ -400,7 +446,26 @@ export function Main() {
                 </div>
             </AnimatePresence>
         </div>
-            <div className="px-4" style={{ display: "flex", flexDirection: "column", justifyContent: "flex-end" }}>
+            <motion.div
+                ref={chatContainerRef}
+                onHoverStart={() => {
+                    console.log('hover start');
+                    setIsAutoScrolling(false);
+                    setIsSavingToTempChat(false);
+                    console.log('is saving to temp chat', isSavingToTempChat);
+                }}
+                onHoverEnd={() => {
+                    console.log('hover end');
+                    setIsAutoScrolling(true);
+                    setIsSavingToTempChat(true);
+                    setChat((prevChat) => {
+                        let newChat = [...prevChat];
+                        newChat = newChat.concat(tempChat);
+                        return newChat.slice(Math.max(newChat.length - 60, 0));
+                    });
+                    console.log('is saving to temp chat', isSavingToTempChat);
+                }}
+                className="px-4" style={{ display: "flex", flexDirection: "column", justifyContent: "flex-end" }}>
                 <div className="chatBox" ref={chatWindowRef} style={{
                     borderRadius: "15px",
                     padding: "24px",
@@ -416,12 +481,12 @@ export function Main() {
                     position: 'relative',
                     scrollbarWidth: 'none',
                     msOverflowStyle: 'none',
-                }}>
+                }}
+                >
                     <AnimatePresence>
                         {chat.filter((chatLine: any) => {
                             if ((chatLine.message || '').toLowerCase().includes(lowerCaseSearchString) ||
                                 (chatLine.user || '').toLowerCase().includes(lowerCaseSearchString)) {
-                                console.log('SEARCH \n\n\n\n', searchString)
                                 return true;
                             } else {
                                 return false;
@@ -535,7 +600,7 @@ export function Main() {
                             )).reverse()}
                     </AnimatePresence>
                 </div>
-            </div>
+            </motion.div>
             <div style={{
                 position: 'fixed',
                 right: '3em',

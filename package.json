@@ -1,6 +1,6 @@
 {
   "name": "prochat-app-v2",
-  "version": "2.9.6",
+  "version": "2.9.7",
   "private": true,
   "scripts": {
     "dev": "node rename-binaries.js && next dev",
@@ -26,6 +26,7 @@
     "next": "13.4.7",
     "react": "18.2.0",
     "react-dom": "18.2.0",
+    "react-hot-toast": "^2.4.1",
     "react-icons": "^4.10.1",
     "simple-tmi-emotes": "^1.1.1",
     "socket.io-client": "^4.7.2",
