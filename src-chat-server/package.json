@@ -4,15 +4,7 @@
     "main": "chat.js",
     "bin": "chat.js",
     "scripts": {
-        "build": "rm -rf ../src-tauri/bin/* && pkg . -o ../src-tauri/bin/chatserver"
-    },
-    "pkg": {
-        "targets": [
-            "node14-linux-x64",
-            "node14-macos-x64",
-            "node14-win-x64"
-        ],
-        "assets": "node_modules/tiktok-live-connector/dist/proto/*.proto"
+        "build": "rm -rf ../src-tauri/bin/*"
     },
     "dependencies": {
         "cors": "^2.8.5",
