@@ -386,7 +386,7 @@ export function Main() {
         const interval = setInterval(() => {
             toast((t) => (
                 <span onClick={() => toast.dismiss(t.id)}>
-                  <b>Tighwin says - "GET BTS FOOTAGE"</b>
+                  <b>Tighwin says - GET BTS FOOTAGE</b>
                 </span>
               ), {
                 duration: 1200000,
